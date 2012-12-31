@@ -1,0 +1,6 @@
+Arm	KEYWORD1
+init	KEYWORD2
+setJointAngle	KEYWORD2
+getJointAngle	KEYWORD2
+setGripperDistance	KEYWORD2
+getGripperDistance	KEYWORD2
