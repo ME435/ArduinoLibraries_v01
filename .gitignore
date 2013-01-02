@@ -11,3 +11,15 @@
 *.lai
 *.la
 *.a
+
+EEPROM/
+Ethernet
+Firmata
+LiquidCrystal
+Morse
+SD
+Servo
+SoftwareSerial
+SPI
+Stepper
+Wire
