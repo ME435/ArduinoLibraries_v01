@@ -34,6 +34,7 @@ class Arm
     Servo _joint5Servo;
     Servo _gripperServo;
     void _updateJointServos();
+    int _clipMappedRange(int unclippedAngle);
 };
 
 #endif
