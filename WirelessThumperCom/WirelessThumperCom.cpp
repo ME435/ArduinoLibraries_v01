@@ -31,7 +31,7 @@ void WirelessThumperCom::_sendMessage(byte messageLength) {
 	_sendByte(-crc);
 }
 
-void _sendByte(byte unescapedbyte) {
+void WirelessThumperCom::_sendByte(byte unescapedbyte) {
 	if (unescapedbyte == START_BYTE ||
 		unescapedbyte == ESCAPE_BYTE) {
 		Serial.write(ESCAPE_BYTE);
