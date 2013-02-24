@@ -1,11 +1,11 @@
-#include <WirelessThumperCom.h>
+#include <WildThumperCom.h>
 
 #define REVERSE 0
 #define BRAKE   1
 #define FORWARD 2
 #define TEAM_NUMBER 16
 
-WirelessThumperCom wtc(TEAM_NUMBER);
+WildThumperCom wtc(TEAM_NUMBER);
 
 void setup() {
   Serial.begin(9600);
@@ -67,69 +67,69 @@ void loop() {
 }
 
 void test1() {
-  wtc.parseByte(START_BYTE);
-  wtc.parseByte(WHEEL_SPEED_MESSAGE_LENGTH);
-  wtc.parseByte(TEAM_NUMBER);
-  wtc.parseByte(COMMAND_WHEEL_SPEED);
-  wtc.parseByte(REVERSE);
-  wtc.parseByte(REVERSE);
-  wtc.parseByte(100);
-  wtc.parseByte(100);
+  wtc.handleRxByte(START_BYTE);
+  wtc.handleRxByte(WHEEL_SPEED_MESSAGE_LENGTH);
+  wtc.handleRxByte(TEAM_NUMBER);
+  wtc.handleRxByte(COMMAND_WHEEL_SPEED);
+  wtc.handleRxByte(REVERSE);
+  wtc.handleRxByte(REVERSE);
+  wtc.handleRxByte(100);
+  wtc.handleRxByte(100);
   // Manually calculate crc 16+1+0+0+100+100 = 217
-  wtc.parseByte(-217);
+  wtc.handleRxByte(-217);
 }
 
 void test2() {
-  wtc.parseByte(START_BYTE);
-  wtc.parseByte(WHEEL_SPEED_MESSAGE_LENGTH);
-  wtc.parseByte(TEAM_NUMBER);
-  wtc.parseByte(COMMAND_WHEEL_SPEED);
-  wtc.parseByte(REVERSE);
-  wtc.parseByte(REVERSE);
-  wtc.parseByte(100);
-  wtc.parseByte(100);
+  wtc.handleRxByte(START_BYTE);
+  wtc.handleRxByte(WHEEL_SPEED_MESSAGE_LENGTH);
+  wtc.handleRxByte(TEAM_NUMBER);
+  wtc.handleRxByte(COMMAND_WHEEL_SPEED);
+  wtc.handleRxByte(REVERSE);
+  wtc.handleRxByte(REVERSE);
+  wtc.handleRxByte(100);
+  wtc.handleRxByte(100);
   // Manually calculate crc 16+1+0+0+100+100 = 217
-  wtc.parseByte(-216);
+  wtc.handleRxByte(-216);
 }
 
 void test3() {
-  wtc.parseByte(START_BYTE);
-  wtc.parseByte(WHEEL_SPEED_MESSAGE_LENGTH);
-  wtc.parseByte(TEAM_NUMBER);
-  wtc.parseByte(COMMAND_WHEEL_SPEED);
-  wtc.parseByte(REVERSE);
-  wtc.parseByte(REVERSE);
-  wtc.parseByte(99);
-  wtc.parseByte(100);
+  wtc.handleRxByte(START_BYTE);
+  wtc.handleRxByte(WHEEL_SPEED_MESSAGE_LENGTH);
+  wtc.handleRxByte(TEAM_NUMBER);
+  wtc.handleRxByte(COMMAND_WHEEL_SPEED);
+  wtc.handleRxByte(REVERSE);
+  wtc.handleRxByte(REVERSE);
+  wtc.handleRxByte(99);
+  wtc.handleRxByte(100);
   // Manually calculate crc 16+1+0+0+99+100 = 216
-  wtc.parseByte(-216);
+  wtc.handleRxByte(-216);
 }
 
 void test4() {
-  wtc.parseByte(START_BYTE);
-  wtc.parseByte(WHEEL_SPEED_MESSAGE_LENGTH);
-  wtc.parseByte(TEAM_NUMBER);
-  wtc.parseByte(COMMAND_WHEEL_SPEED);
-  wtc.parseByte(BRAKE);
-  wtc.parseByte(FORWARD);
-  wtc.parseByte(100);
-  wtc.parseByte(100);
+  wtc.handleRxByte(START_BYTE);
+  wtc.handleRxByte(WHEEL_SPEED_MESSAGE_LENGTH);
+  wtc.handleRxByte(TEAM_NUMBER);
+  wtc.handleRxByte(COMMAND_WHEEL_SPEED);
+  wtc.handleRxByte(BRAKE);
+  wtc.handleRxByte(FORWARD);
+  wtc.handleRxByte(100);
+  wtc.handleRxByte(100);
   // Manually calculate crc 16+1+1+2+100+100 = 220
-  wtc.parseByte(-220);
+  wtc.handleRxByte(-220);
 }
 
 void test5() {
-  wtc.parseByte(START_BYTE);
-  wtc.parseByte(WHEEL_SPEED_MESSAGE_LENGTH);
-  wtc.parseByte(TEAM_NUMBER);
-  wtc.parseByte(COMMAND_WHEEL_SPEED);
-  wtc.parseByte(REVERSE);
-  wtc.parseByte(REVERSE);
+  wtc.handleRxByte(START_BYTE);
+  wtc.handleRxByte(WHEEL_SPEED_MESSAGE_LENGTH);
+  wtc.handleRxByte(TEAM_NUMBER);
+  wtc.handleRxByte(COMMAND_WHEEL_SPEED);
+  wtc.handleRxByte(REVERSE);
+  wtc.handleRxByte(REVERSE);
   // Escaping manually the start byte and the escape byte
-  wtc.parseByte(125);
-  wtc.parseByte(94);
-  wtc.parseByte(125);
-  wtc.parseByte(93);
+  wtc.handleRxByte(125);
+  wtc.handleRxByte(94);
+  wtc.handleRxByte(125);
+  wtc.handleRxByte(93);
   // Manually calculate crc 16+1+0+0+126+125 = 12
-  wtc.parseByte(-12);
+  wtc.handleRxByte(-12);
 }

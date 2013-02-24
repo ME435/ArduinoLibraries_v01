@@ -1,4 +1,4 @@
-#include <WirelessThumperCom.h>
+#include <WildThumperCom.h>
 
 #define REVERSE 0
 #define BRAKE   1
@@ -7,7 +7,7 @@
 #define CENTER_DEADBAND 5
 #define CHANGE_THRESHOLD 5
 
-WirelessThumperCom wtc(TEAM_NUMBER);
+WildThumperCom wtc(TEAM_NUMBER);
 int lastSentVertReading = 0;
 int lastSentHorzReading = 0;
 byte leftMode, rightMode, leftDutyCycle, rightDutyCycle;

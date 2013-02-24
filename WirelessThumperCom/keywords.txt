@@ -1,4 +1,0 @@
-WirelessThumperCom	KEYWORD1
-sendWheelSpeed	KEYWORD2
-registerWheelSpeedCallback	KEYWORD2
-parseByte	KEYWORD2

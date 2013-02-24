@@ -2,8 +2,8 @@
 #include <Usb.h>
 #include <AndroidAccessory.h>
 #include <Servo.h>
-#include <Arm.h>
-#include <CommandParser.h>
+#include <ArmServos.h>
+#include <RobotAsciiCom.h>
 
 // Only Manufacturer, Model, and Version matter to Android
 AndroidAccessory acc("Rose-Hulman",
@@ -14,8 +14,8 @@ AndroidAccessory acc("Rose-Hulman",
                      "12345");
 
 // Create the arm and command parser libraries.
-Arm robotArm;
-CommandParser commandParser;
+ArmServos armServos;
+RobotAsciiCom robotCom;
 
 // Global variables.
 char script1[] = "SIMPLE";  // Set to a script name in your Android app
@@ -27,11 +27,13 @@ volatile int mainEventFlags = 0;
 
 void setup() {
   Serial.begin(115200);
-  robotArm.init();
-  commandParser.init(robotArm);
+  armServos.attach();
   pinMode(13, OUTPUT);
   pinMode(2, INPUT_PULLUP);    
   attachInterrupt(0, int0_isr, FALLING);
+  robotCom.registerPositionCallback(positionCallback);
+  robotCom.registerJointAngleCallback(jointAngleCallback);
+  robotCom.registerGripperCallback(gripperCallback); 
   delay(1500);
   acc.powerOn();
 }
@@ -39,6 +41,18 @@ void setup() {
 void int0_isr() {
   mainEventFlags |= FLAG_INTERRUPT_0;
 }
+
+void positionCallback(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
+  armServos.setPosition(joint1Angle, joint2Angle, joint3Angle, joint4Angle, joint5Angle);
+}
+
+void jointAngleCallback(byte jointNumber, int jointAngle) {
+  armServos.setJointAngle(jointNumber, jointAngle);
+}
+
+void gripperCallback(int gripperDistance) {
+  armServos.setGripperDistance(gripperDistance);
+}   
 
 void loop() {
 
@@ -74,30 +88,12 @@ void loop() {
   if (acc.isConnected()) {
     int len = acc.read(rxBuf, sizeof(rxBuf), 1);
     if (len > 0) {
-      
-      // Toggle the LED every message just for fun.
-//      if (ledIsOn) {
-//        digitalWrite(13, LOW);
-//        ledIsOn = 0;
-//      } else {
-//        digitalWrite(13, HIGH);
-//        ledIsOn = 1;
-//      }
-      
       // Print the message from Android to the PC monitor
 //      for (int x = 0; x < len; x++) {
 //        Serial.print((char) rxBuf[x]);
 //      }
-      
-      // Actually do something with the message.
-      // All my messages should end with my terminator character (ASCII 13)
-      if (rxBuf[len - 1] == '\n') {
-        // Convert to a String and parse the message to figure out the details
-        rxBuf[len - 1] = '\0';
-        String rxStr = String(rxBuf);
-        commandParser.parseCommand(rxStr);
-      } 
-    } // close len > 0
-  } // close acc is connected
-}  // close loop()
+	  robotCom.handleRxBytes(rxBuf, len);
+    }
+  }
+}
 

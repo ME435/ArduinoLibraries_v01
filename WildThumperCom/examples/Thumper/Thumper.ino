@@ -13,7 +13,7 @@
 // Ground is on the outside, 5v power in the middle, Thumper Rx on inside.
 // The Tx line for the Thumper is on D1 inside, but not needed for this program.
 
-#include <WirelessThumperCom.h>
+#include <WildThumperCom.h>
 
 #define TEAM_NUMBER 4  // Change as appropriate for your team
 
@@ -33,12 +33,12 @@
 #define REVERSE 0  // Mode to go in reverse
 #define BRAKE   1  // Mode to stop
 #define FORWARD 2  // Mode to go forward
-#define BATTERY_SHUTDOWN_VOLTAGE       410     // This is the voltage at which the battery is too low to continue.
-#define MAX_LEFT_AMPS        800     // overload current limit for left motor (help reduce the risk of stalled motors drawing too much current)
-#define MAX_RIGHT_AMPS       800     // overload current limit for right motor (help reduce the risk of stalled motors drawing too much current)
+#define BATTERY_SHUTDOWN_MILLIVOLTS     6400     // This is the millivolt reading at which the battery is too low to continue. (6.4 volts)
+#define MOTOR_SHUTDOWN_MILLIAMPS        8000     // overload current limit for motor (help reduce the risk of stalled motors drawing too much current) (8 amps)
 #define COOLDOWN_TIME        100     // time in mS before motor is re-enabled after overload occurs
 
-WirelessThumperCom wtc(TEAM_NUMBER);
+
+WildThumperCom wtc(TEAM_NUMBER);
 unsigned long lastLeftMotorCurrentOverloadTime_ms = 0;
 unsigned long lastRightMotorCurrentOverloadTime_ms = 0;
 int leftMotorMode = BRAKE;                                           // 0=reverse, 1=brake, 2=forward
@@ -65,26 +65,35 @@ void updateWheelSpeed(byte leftMode, byte rightMode, byte leftDutyCycle, byte ri
 
 void loop() {
   //--------------------- Check battery voltage and current draw of motors ---------------------
-  int batteryVoltageReading = analogRead(PIN_BATTERY);             // read the battery voltage
-  int leftCurrentReading = analogRead(PIN_LEFT_MOTOR_CURRENT);     // read left motor current draw
-  int rightCurrentReading = analogRead(PIN_RIGHT_MOTOR_CURRENT);   // read right motor current draw
+  int batteryVoltageAnalogReading = analogRead(PIN_BATTERY);      // read the battery voltage
+  int leftCurrentAnalogReading = analogRead(PIN_LEFT_MOTOR_CURRENT);     // read left motor current draw
+  int rightCurrentAnalogReading = analogRead(PIN_RIGHT_MOTOR_CURRENT);   // read right motor current draw
+  int batteryInMillivolts = batteryVoltageAnalogReading * 14 + batteryVoltageAnalogReading / 2;      // 14.66 is the real value 14.5 is close enough
+  int leftCurrentInMilliamps = leftCurrentAnalogReading * 20;     // left motor current draw in milliamps
+  int rightCurrentInMilliamps = rightCurrentAnalogReading * 20;   // right motor current draw in milliamps
   
-  if (batteryVoltageReading < BATTERY_SHUTDOWN_VOLTAGE) {
-      // TODO: Shut down the Wild Thumper if the battery voltage is too low (or spin in a circle or something).
+
+  if (batteryInMillivolts < BATTERY_SHUTDOWN_MILLIVOLTS) {      
+      // Shut down the Wild Thumper if the battery voltage is too low (or spin in a circle or something).
+      if ((millis() / 1000) % 2) {      
+        updateWheelSpeed(FORWARD, FORWARD, 20, 20);
+      } else {
+        updateWheelSpeed(BRAKE, BRAKE, 0, 0);
+      }
   }
   
-  if (leftCurrentReading > MAX_LEFT_AMPS)                           // is motor current draw exceeding safe limit
+  if (leftCurrentInMilliamps > MOTOR_SHUTDOWN_MILLIAMPS)                           // is motor current draw exceeding safe limit
   {
     analogWrite(PIN_LEFT_MOTOR_CH_A, 0);                            // turn off motors
     analogWrite(PIN_LEFT_MOTOR_CH_B, 0);                            // turn off motors
     lastLeftMotorCurrentOverloadTime_ms = millis();                 // record time of overload
   }
 
-  if (rightCurrentReading > MAX_RIGHT_AMPS)                          // is motor current draw exceeding safe limit
+  if (rightCurrentInMilliamps > MOTOR_SHUTDOWN_MILLIAMPS)                          // is motor current draw exceeding safe limit
   {
     analogWrite(PIN_RIGHT_MOTOR_CH_A, 0);                            // turn off motors
     analogWrite(PIN_RIGHT_MOTOR_CH_B, 0);                            // turn off motors
-    lastRightMotorCurrentOverloadTime_ms=millis();                   // record time of overload
+    lastRightMotorCurrentOverloadTime_ms = millis();                   // record time of overload
   }    
   
   //--------------------- Set the motor speeds (if not in a stalled motor state) ---------------------
@@ -93,16 +102,16 @@ void loop() {
     switch (leftMotorMode)
     {
       case FORWARD:                                             // left motor forward
-        analogWrite(PIN_LEFT_MOTOR_CH_A,0);
-        analogWrite(PIN_LEFT_MOTOR_CH_B,leftMotorDutyCycle);
+        analogWrite(PIN_LEFT_MOTOR_CH_A, 0);
+        analogWrite(PIN_LEFT_MOTOR_CH_B, leftMotorDutyCycle);
         break;
       case BRAKE:                                               // left motor brake
-        analogWrite(PIN_LEFT_MOTOR_CH_A,leftMotorDutyCycle);
-        analogWrite(PIN_LEFT_MOTOR_CH_B,leftMotorDutyCycle);
+        analogWrite(PIN_LEFT_MOTOR_CH_A, leftMotorDutyCycle);
+        analogWrite(PIN_LEFT_MOTOR_CH_B, leftMotorDutyCycle);
         break;
       case REVERSE:                                             // left motor reverse
-        analogWrite(PIN_LEFT_MOTOR_CH_A,leftMotorDutyCycle);
-        analogWrite(PIN_LEFT_MOTOR_CH_B,0);
+        analogWrite(PIN_LEFT_MOTOR_CH_A, leftMotorDutyCycle);
+        analogWrite(PIN_LEFT_MOTOR_CH_B, 0);
         break;
     }
   }
@@ -111,24 +120,24 @@ void loop() {
     switch (rightMotorMode)
     {
       case FORWARD:                                             // right motor forward
-        analogWrite(PIN_RIGHT_MOTOR_CH_A,0);
-        analogWrite(PIN_RIGHT_MOTOR_CH_B,rightMotorDutyCycle);
+        analogWrite(PIN_RIGHT_MOTOR_CH_A, 0);
+        analogWrite(PIN_RIGHT_MOTOR_CH_B, rightMotorDutyCycle);
         break;
       case BRAKE:                                               // right motor brake
-        analogWrite(PIN_RIGHT_MOTOR_CH_A,rightMotorDutyCycle);
-        analogWrite(PIN_RIGHT_MOTOR_CH_B,rightMotorDutyCycle);
+        analogWrite(PIN_RIGHT_MOTOR_CH_A, rightMotorDutyCycle);
+        analogWrite(PIN_RIGHT_MOTOR_CH_B, rightMotorDutyCycle);
         break;
       case REVERSE:                                             // right motor reverse
-        analogWrite(PIN_RIGHT_MOTOR_CH_A,rightMotorDutyCycle);
-        analogWrite(PIN_RIGHT_MOTOR_CH_B,0);
+        analogWrite(PIN_RIGHT_MOTOR_CH_A, rightMotorDutyCycle);
+        analogWrite(PIN_RIGHT_MOTOR_CH_B, 0);
         break;
     }
   }
 }
 
-/** Send all bytes received to the Wireless Thumper Com object. */
+/** Send all bytes received to the Wild Thumper Com object. */
 void serialEvent() {
   while (Serial.available()) {
-    wtc.parseByte(Serial.read());
+    wtc.handleRxByte(Serial.read());
   }
 }
