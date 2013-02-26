@@ -4,24 +4,33 @@
 #include "Arduino.h"
 #include "Servo.h"
 
-#define JOINT_1_SERVO_PIN 12
-#define JOINT_2_SERVO_PIN 11
-#define JOINT_3_SERVO_PIN 10
-#define JOINT_4_SERVO_PIN 9
-#define JOINT_5_SERVO_PIN 8
-#define GRIPPER_SERVO_PIN 6
+#define DEFAULT_JOINT_1_SERVO_PIN 12
+#define DEFAULT_JOINT_2_SERVO_PIN 11
+#define DEFAULT_JOINT_3_SERVO_PIN 10
+#define DEFAULT_JOINT_4_SERVO_PIN  9
+#define DEFAULT_JOINT_5_SERVO_PIN  8
+#define DEFAULT_GRIPPER_SERVO_PIN  6
+
+#define INITIAL_JOINT_1_ANGLE 	  0
+#define INITIAL_JOINT_2_ANGLE 	 90
+#define INITIAL_JOINT_3_ANGLE 	  0
+#define INITIAL_JOINT_4_ANGLE 	-90
+#define INITIAL_JOINT_5_ANGLE 	 90
+#define INITIAL_GRIPPER_DISTANCE 50
 
 class ArmServos
 {
   public:
 	ArmServos();
+	ArmServos(byte joint1ServoPin, byte joint2ServoPin, byte joint3ServoPin, byte joint4ServoPin, byte joint5ServoPin, byte gripperServoPin);
     void attach();
-    void setJointAngle(int jointNumber, int angle);
-    int getJointAngle(int jointNumber);
+    void setJointAngle(byte jointNumber, int angle);
+    int getJointAngle(byte jointNumber);
     void setGripperDistance(int distance);
     int getGripperDistance();
-    void setPositionint joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle);
+    void setPosition(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle);
   private:
+    byte _joint1ServoPin, _joint2ServoPin, _joint3ServoPin, _joint4ServoPin, _joint5ServoPin, _gripperServoPin;
     int _joint1Angle;
     int _joint2Angle;
     int _joint3Angle;
@@ -34,7 +43,7 @@ class ArmServos
     Servo _joint4Servo;
     Servo _joint5Servo;
     Servo _gripperServo;
-    void _updateJointServos();
+    void _updateServos();
 };
 
 #endif

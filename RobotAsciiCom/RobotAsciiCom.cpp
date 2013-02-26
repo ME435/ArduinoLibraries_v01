@@ -6,6 +6,8 @@ RobotAsciiCom::RobotAsciiCom() {
 	_positionCallback = NULL;
 	_jointAngleCallback = NULL;
 	_gripperCallback = NULL;
+	_batteryVoltageRequestCallback = NULL;
+	_wheelSpeedCallback = NULL;
 }
 
 /**
@@ -44,13 +46,21 @@ void RobotAsciiCom::registerPositionCallback(
 }
 
 void RobotAsciiCom::registerJointAngleCallback(
-		void (*jointAngleCallback)(byte joint, int jointAngle)) {
+		void (*jointAngleCallback)(byte jointNumber, int jointAngle)) {
 	_jointAngleCallback = jointAngleCallback;
 }
 
 void RobotAsciiCom::registerGripperCallback(
-		void (*gripperCallback)(int gripperDistance)) {
+		void (*gripperCallback)(byte gripperDistance)) {
 	_gripperCallback = gripperCallback;
+}
+
+void RobotAsciiCom::registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void)) {
+	_batteryVoltageRequestCallback = batteryVoltageRequestCallback;
+}
+
+void RobotAsciiCom::registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle)) {
+	_wheelSpeedCallback = wheelSpeedCallback;
 }
 
 void RobotAsciiCom::_parseStringCommand(String command) {
@@ -83,7 +93,48 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		int lastSpaceIndex = command.lastIndexOf(' ');
 		angleStr = command.substring(lastSpaceIndex + 1);
 		if (_jointAngleCallback != NULL) {
-			_jointAngleCallback(jointNumStr.toInt(), angleStr.toInt());
+			_jointAngleCallback((byte) (jointNumStr.toInt()), angleStr.toInt());
+		}
+	} else if (command.startsWith("BATTERY VOLTAGE REQUEST")) {
+		if (_batteryVoltageRequestCallback != NULL) {
+			_batteryVoltageRequestCallback();
+		}
+	} else if (command.startsWith("WHEEL SPEED")) {
+		command = command.substring(spaceIndex + 1); // Removes the word WHEEL
+		spaceIndex = command.indexOf(' ');
+		command = command.substring(spaceIndex + 1); // Removes the word SPEED
+		
+		// Grab the left wheel parameters.
+		byte leftMode = WHEEL_SPEED_MODE_BRAKE;
+		if (command.startsWith("FORWARD")) {
+			leftMode = WHEEL_SPEED_MODE_FORWARD;
+		} else if (command.startsWith("REVERSE")) {
+			leftMode = WHEEL_SPEED_MODE_REVERSE;
+		}
+		spaceIndex = command.indexOf(' ');
+		command = command.substring(spaceIndex + 1); // Removes the left mode
+		spaceIndex = command.indexOf(' ');
+		String leftDutyCycleStr = command.substring(0, spaceIndex);
+		byte leftDutyCycle = (byte) (leftDutyCycleStr.toInt());
+		command = command.substring(spaceIndex + 1); // Removes the left duty cycle
+		
+		// Grab the right wheel parameters.
+		// Note, obviously this should be a function as it's the same as the above (lazy).
+		byte rightMode = WHEEL_SPEED_MODE_BRAKE;
+		if (command.startsWith("FORWARD")) {
+			rightMode = WHEEL_SPEED_MODE_FORWARD;
+		} else if (command.startsWith("REVERSE")) {
+			rightMode = WHEEL_SPEED_MODE_REVERSE;
+		}
+		spaceIndex = command.indexOf(' ');
+		command = command.substring(spaceIndex + 1); // Removes the right mode
+		spaceIndex = command.indexOf(' ');
+		String rightDutyCycleStr = command.substring(0, spaceIndex);
+		byte rightDutyCycle = (byte) (rightDutyCycleStr.toInt());		
+
+		// Inform the callback of the command.  Note, no error handling. :)
+		if (_wheelSpeedCallback != NULL) {
+			_wheelSpeedCallback(leftMode, rightMode, leftDutyCycle, rightDutyCycle);
 		}
 	}
 }

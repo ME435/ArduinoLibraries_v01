@@ -34,7 +34,7 @@
 #define BRAKE   1  // Mode to stop
 #define FORWARD 2  // Mode to go forward
 #define BATTERY_SHUTDOWN_MILLIVOLTS     6400     // This is the millivolt reading at which the battery is too low to continue. (6.4 volts)
-#define MOTOR_SHUTDOWN_MILLIAMPS        8000     // overload current limit for motor (help reduce the risk of stalled motors drawing too much current) (8 amps)
+#define MOTOR_SHUTDOWN_MILLIAMPS        9000     // overload current limit for motor (help reduce the risk of stalled motors drawing too much current) (9 amps)
 #define COOLDOWN_TIME        100     // time in mS before motor is re-enabled after overload occurs
 
 

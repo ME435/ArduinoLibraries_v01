@@ -18,17 +18,14 @@ ArmServos armServos;
 RobotAsciiCom robotCom;
 
 // Global variables.
-char script1[] = "SIMPLE";  // Set to a script name in your Android app
-char script2[] = "S2";  // Set to a another script name in your Android app
-char rxBuf[255];
-byte ledIsOn = 0;
+char script1[] = "SCRIPT1";  // Set to a script name in your Android app
+byte rxBuf[255];
 volatile int mainEventFlags = 0;
 #define FLAG_INTERRUPT_0 0x01
 
 void setup() {
   Serial.begin(115200);
   armServos.attach();
-  pinMode(13, OUTPUT);
   pinMode(2, INPUT_PULLUP);    
   attachInterrupt(0, int0_isr, FALLING);
   robotCom.registerPositionCallback(positionCallback);
@@ -44,55 +41,55 @@ void int0_isr() {
 
 void positionCallback(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
   armServos.setPosition(joint1Angle, joint2Angle, joint3Angle, joint4Angle, joint5Angle);
+  Serial.println();
+  Serial.print("Position command: ");
+  Serial.print(joint1Angle);
+  Serial.print(" ");
+  Serial.print(joint2Angle);
+  Serial.print(" ");
+  Serial.print(joint3Angle);
+  Serial.print(" ");
+  Serial.print(joint4Angle);
+  Serial.print(" ");
+  Serial.print(joint5Angle);
+  Serial.println();
 }
 
 void jointAngleCallback(byte jointNumber, int jointAngle) {
   armServos.setJointAngle(jointNumber, jointAngle);
+  Serial.println();
+  Serial.print("Joint angle command for joint ");
+  Serial.print(jointNumber);
+  Serial.print(" to move to ");
+  Serial.print(jointAngle);
+  Serial.println();
 }
 
-void gripperCallback(int gripperDistance) {
+void gripperCallback(byte gripperDistance) {
   armServos.setGripperDistance(gripperDistance);
+  Serial.println();
+  Serial.print("Gripper command to ");
+  Serial.print(gripperDistance);
+  Serial.println();
 }   
 
 void loop() {
-
-    // Toggle the LED after an interrupt for debug feedback.
-    if (mainEventFlags & FLAG_INTERRUPT_0) {
-      //Serial.println("Received and interrupt!");
-      delay(20);
-      mainEventFlags &= !FLAG_INTERRUPT_0;
-      // Only perform the action if the switch is still low.
-      // This is a simple software debounce mechanism.
-      if (!digitalRead(2)) {
-        if (ledIsOn) {
-          digitalWrite(13, LOW);
-          ledIsOn = 0;
-          if (acc.isConnected()) {
-            acc.write(script1, 6);
-            Serial.print("Sent ");
-            Serial.println(script1);
-          }
-        } else {
-          digitalWrite(13, HIGH);
-          ledIsOn = 1;
-          if (acc.isConnected()) {
-            acc.write(script2, 2);
-            Serial.println("Sent ");
-            Serial.println(script1);
-          }
-        }
-      }
+  if (mainEventFlags & FLAG_INTERRUPT_0) {
+    delay(20);
+    mainEventFlags &= ~FLAG_INTERRUPT_0;
+    if (!digitalRead(2) && acc.isConnected()) {
+      acc.write(script1, 6);
     }
-
+  }
   // See if there is a new message from Android.
   if (acc.isConnected()) {
     int len = acc.read(rxBuf, sizeof(rxBuf), 1);
     if (len > 0) {
       // Print the message from Android to the PC monitor
-//      for (int x = 0; x < len; x++) {
-//        Serial.print((char) rxBuf[x]);
-//      }
-	  robotCom.handleRxBytes(rxBuf, len);
+      for (int x = 0; x < len - 1; x++) {
+        Serial.print((char) rxBuf[x]);
+      }
+      robotCom.handleRxBytes(rxBuf, len);
     }
   }
 }

@@ -2,27 +2,44 @@
 #include "ArmServos.h"
 
 ArmServos::ArmServos() {
-	// CONSIDER: Allow a user to change the pin numbers
-	_joint1Angle = 0;
-	_joint2Angle = 90;
-	_joint3Angle = 0;
-	_joint4Angle = -90;
-	_joint5Angle = 0;
-	_gripperDistance = 50;
+	_joint1ServoPin = DEFAULT_JOINT_1_SERVO_PIN;
+	_joint2ServoPin = DEFAULT_JOINT_2_SERVO_PIN;
+	_joint3ServoPin = DEFAULT_JOINT_3_SERVO_PIN;
+	_joint4ServoPin = DEFAULT_JOINT_4_SERVO_PIN;
+	_joint5ServoPin = DEFAULT_JOINT_5_SERVO_PIN;
+	_gripperServoPin = DEFAULT_GRIPPER_SERVO_PIN;
+}
+
+ArmServos::ArmServos(byte joint1ServoPin, byte joint2ServoPin,
+		byte joint3ServoPin, byte joint4ServoPin, byte joint5ServoPin,
+		byte gripperServoPin) {
+	_joint1ServoPin = joint1ServoPin;
+	_joint2ServoPin = joint2ServoPin;
+	_joint3ServoPin = joint3ServoPin;
+	_joint4ServoPin = joint4ServoPin;
+	_joint5ServoPin = joint5ServoPin;
+	_gripperServoPin = gripperServoPin;
 }
 
 void ArmServos::attach() {
-	_joint1Servo.attach(JOINT_1_SERVO_PIN);
-	_joint2Servo.attach(JOINT_2_SERVO_PIN);
-	_joint3Servo.attach(JOINT_3_SERVO_PIN);
-	_joint4Servo.attach(JOINT_4_SERVO_PIN);
-	_joint5Servo.attach(JOINT_5_SERVO_PIN);
-	_gripperServo.attach(GRIPPER_SERVO_PIN);
+	_joint1Angle = INITIAL_JOINT_1_ANGLE;
+	_joint2Angle = INITIAL_JOINT_2_ANGLE;
+	_joint3Angle = INITIAL_JOINT_3_ANGLE;
+	_joint4Angle = INITIAL_JOINT_4_ANGLE;
+	_joint5Angle = INITIAL_JOINT_5_ANGLE;
+	_gripperDistance = INITIAL_GRIPPER_DISTANCE;
+
+	_joint1Servo.attach(_joint1ServoPin);
+	_joint2Servo.attach(_joint2ServoPin);
+	_joint3Servo.attach(_joint3ServoPin);
+	_joint4Servo.attach(_joint4ServoPin);
+	_joint5Servo.attach(_joint5ServoPin);
+	_gripperServo.attach(_gripperServoPin);
 	delay(100);  // May not be required, but saw in example code.
-	_updateJointServos();
+	_updateServos();
 }
 
-void ArmServos::_updateJointServos() {
+void ArmServos::_updateServos() {
 	// Joint 1 DH goes from -90 to 90
 	int mappedJoint1Angle = _joint1Angle + 90;
 	// Joint 2 DH goes from 0 to 180
@@ -50,7 +67,7 @@ void ArmServos::_updateJointServos() {
 	_joint4Servo.write(mappedJoint4Angle);
 	_joint5Servo.write(mappedJoint5Angle);
 	_gripperServo.write(mappedGripperDistance);
-	
+
 //	Serial.print("Moving arm to ");
 //	Serial.print(mappedJoint1Angle);
 //	Serial.print(" ");
@@ -67,17 +84,17 @@ void ArmServos::_updateJointServos() {
 }
 
 // For the common case of setting 5 joints at once.
-void ArmServos::setPositionint joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
+void ArmServos::setPosition(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
 	_joint1Angle = joint1Angle;
 	_joint2Angle = joint2Angle;
 	_joint3Angle = joint3Angle;
 	_joint4Angle = joint4Angle;
 	_joint5Angle = joint5Angle;
-	_updateJointServos();
+	_updateServos();
 }
 
 // Consider: Change to an array to make code cleaner (low priority).
-void ArmServos::setJointAngle(int jointNumber, int angle) {
+void ArmServos::setJointAngle(byte jointNumber, int angle) {
 	switch (jointNumber) {
 	case 1:
 		_joint1Angle = angle;
@@ -95,10 +112,10 @@ void ArmServos::setJointAngle(int jointNumber, int angle) {
 		_joint5Angle = angle;
 		break;
 	}
-	_updateJointServos();	
+	_updateServos();
 }
 
-int ArmServos::getJointAngle(int jointNumber) {
+int ArmServos::getJointAngle(byte jointNumber) {
 	switch (jointNumber) {
 	case 1:
 		return _joint1Angle;
@@ -115,7 +132,7 @@ int ArmServos::getJointAngle(int jointNumber) {
 
 void ArmServos::setGripperDistance(int distance) {
 	_gripperDistance = distance;
-	_updateJointServos();
+	_updateServos();
 }
 
 int ArmServos::getGripperDistance() {

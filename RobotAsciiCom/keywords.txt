@@ -1,6 +1,23 @@
-StringCommandArmController	KEYWORD1
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+RobotAsciiCom	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
 handleRxByte	KEYWORD2
 handleRxBytes	KEYWORD2
 registerPositionCallback	KEYWORD2
 registerJointAngleCallback	KEYWORD2
 registerGripperCallback	KEYWORD2  
+registerBatteryVoltageRequestCallback	KEYWORD2    
+registerWheelSpeedCallback	KEYWORD2  
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+
