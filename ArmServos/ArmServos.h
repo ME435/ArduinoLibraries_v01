@@ -18,6 +18,9 @@
 #define INITIAL_JOINT_5_ANGLE 	 90
 #define INITIAL_GRIPPER_DISTANCE 50
 
+#define NUM_SERVOS 6
+#define GRIPPER_SERVO_INDEX 0
+
 class ArmServos
 {
   public:
@@ -27,23 +30,19 @@ class ArmServos
     void setJointAngle(byte jointNumber, int angle);
     int getJointAngle(byte jointNumber);
     void setGripperDistance(int distance);
-    int getGripperDistance();
+    int getGripperDistance(void);
     void setPosition(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle);
-  private:
+  protected:
     byte _joint1ServoPin, _joint2ServoPin, _joint3ServoPin, _joint4ServoPin, _joint5ServoPin, _gripperServoPin;
-    int _joint1Angle;
-    int _joint2Angle;
-    int _joint3Angle;
-    int _joint4Angle;
-    int _joint5Angle;
-    int _gripperDistance;
+    int _servoAngles[NUM_SERVOS];
     Servo _joint1Servo;
     Servo _joint2Servo;
     Servo _joint3Servo;
     Servo _joint4Servo;
     Servo _joint5Servo;
     Servo _gripperServo;
-    void _updateServos();
+    void _init(void);
+    void _updateServos(void);
 };
 
 #endif

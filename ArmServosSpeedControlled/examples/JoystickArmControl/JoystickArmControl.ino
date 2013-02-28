@@ -46,7 +46,6 @@ int currentJoint = 0;
 #define MAX_CURRENT_JOINT 5
 
 void setup() {
-  Serial.begin(115200);
   pinMode(PIN_LED_1, OUTPUT);
   pinMode(PIN_LED_2, OUTPUT);
   pinMode(PIN_LED_3, OUTPUT);
@@ -72,8 +71,6 @@ void setup() {
   servoAngles[4] = RESET_JOINT_4_ANGLE;
   servoAngles[5] = RESET_JOINT_5_ANGLE;
   servoAngles[0] = RESET_GRIPPER_DISTANCE;
-  robotArm.attach();
-  updateServos();
 }
 
 void loop() {

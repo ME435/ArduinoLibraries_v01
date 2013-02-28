@@ -8,6 +8,7 @@ ArmServos::ArmServos() {
 	_joint4ServoPin = DEFAULT_JOINT_4_SERVO_PIN;
 	_joint5ServoPin = DEFAULT_JOINT_5_SERVO_PIN;
 	_gripperServoPin = DEFAULT_GRIPPER_SERVO_PIN;
+	_init();
 }
 
 ArmServos::ArmServos(byte joint1ServoPin, byte joint2ServoPin,
@@ -19,16 +20,19 @@ ArmServos::ArmServos(byte joint1ServoPin, byte joint2ServoPin,
 	_joint4ServoPin = joint4ServoPin;
 	_joint5ServoPin = joint5ServoPin;
 	_gripperServoPin = gripperServoPin;
+	_init();
+}
+
+void ArmServos::_init() {
+	_servoAngles[1] = INITIAL_JOINT_1_ANGLE;
+	_servoAngles[2] = INITIAL_JOINT_2_ANGLE;
+	_servoAngles[3] = INITIAL_JOINT_3_ANGLE;
+	_servoAngles[4] = INITIAL_JOINT_4_ANGLE;
+	_servoAngles[5] = INITIAL_JOINT_5_ANGLE;
+	_servoAngles[GRIPPER_SERVO_INDEX] = INITIAL_GRIPPER_DISTANCE;	
 }
 
 void ArmServos::attach() {
-	_joint1Angle = INITIAL_JOINT_1_ANGLE;
-	_joint2Angle = INITIAL_JOINT_2_ANGLE;
-	_joint3Angle = INITIAL_JOINT_3_ANGLE;
-	_joint4Angle = INITIAL_JOINT_4_ANGLE;
-	_joint5Angle = INITIAL_JOINT_5_ANGLE;
-	_gripperDistance = INITIAL_GRIPPER_DISTANCE;
-
 	_joint1Servo.attach(_joint1ServoPin);
 	_joint2Servo.attach(_joint2ServoPin);
 	_joint3Servo.attach(_joint3ServoPin);
@@ -41,18 +45,18 @@ void ArmServos::attach() {
 
 void ArmServos::_updateServos() {
 	// Joint 1 DH goes from -90 to 90
-	int mappedJoint1Angle = _joint1Angle + 90;
+	int mappedJoint1Angle = _servoAngles[1] + 90;
 	// Joint 2 DH goes from 0 to 180
-	int mappedJoint2Angle = _joint2Angle;
+	int mappedJoint2Angle = _servoAngles[2];
 	// Joint 3 DH goes from 90 to -90
-	int mappedJoint3Angle = 90 - _joint3Angle;
+	int mappedJoint3Angle = 90 - _servoAngles[3];
 	// Joint 4 DH goes from -180 to 0
-	int mappedJoint4Angle = _joint4Angle + 180;
+	int mappedJoint4Angle = _servoAngles[4] + 180;
 	// Joint 5 DH goes from 0 to 180
-	int mappedJoint5Angle = _joint5Angle;
+	int mappedJoint5Angle = _servoAngles[5];
 	// 60 value on servo = 0 mm (less also 0)
 	// 180 value on servo = 2.8 inches (71 mm)
-	int mappedGripperDistance = _gripperDistance * 2 + 50;
+	int mappedGripperDistance = _servoAngles[GRIPPER_SERVO_INDEX] * 2 + 50;
 	// Constrain to 0 to 180 values.
 	mappedJoint1Angle = constrain(mappedJoint1Angle, 0, 180);
 	mappedJoint2Angle = constrain(mappedJoint2Angle, 0, 180);
@@ -85,56 +89,30 @@ void ArmServos::_updateServos() {
 
 // For the common case of setting 5 joints at once.
 void ArmServos::setPosition(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
-	_joint1Angle = joint1Angle;
-	_joint2Angle = joint2Angle;
-	_joint3Angle = joint3Angle;
-	_joint4Angle = joint4Angle;
-	_joint5Angle = joint5Angle;
+	_servoAngles[1] = joint1Angle;
+	_servoAngles[2] = joint2Angle;
+	_servoAngles[3] = joint3Angle;
+	_servoAngles[4] = joint4Angle;
+	_servoAngles[5] = joint5Angle;
 	_updateServos();
 }
 
-// Consider: Change to an array to make code cleaner (low priority).
 void ArmServos::setJointAngle(byte jointNumber, int angle) {
-	switch (jointNumber) {
-	case 1:
-		_joint1Angle = angle;
-		break;
-	case 2:
-		_joint2Angle = angle;
-		break;
-	case 3:
-		_joint3Angle = angle;
-		break;
-	case 4:
-		_joint4Angle = angle;
-		break;
-	case 5:
-		_joint5Angle = angle;
-		break;
+	if (jointNumber > 0 && jointNumber < NUM_SERVOS) {
+		_servoAngles[jointNumber] = angle;		
 	}
 	_updateServos();
 }
 
 int ArmServos::getJointAngle(byte jointNumber) {
-	switch (jointNumber) {
-	case 1:
-		return _joint1Angle;
-	case 2:
-		return _joint2Angle;
-	case 3:
-		return _joint3Angle;
-	case 4:
-		return _joint4Angle;
-	case 5:
-		return _joint5Angle;
-	}
+	return _servoAngles[jointNumber];
 }
 
 void ArmServos::setGripperDistance(int distance) {
-	_gripperDistance = distance;
+	_servoAngles[GRIPPER_SERVO_INDEX] = distance;
 	_updateServos();
 }
 
 int ArmServos::getGripperDistance() {
-	return _gripperDistance;
+	return _servoAngles[GRIPPER_SERVO_INDEX];
 }
