@@ -51,7 +51,7 @@ void RobotAsciiCom::registerJointAngleCallback(
 }
 
 void RobotAsciiCom::registerGripperCallback(
-		void (*gripperCallback)(byte gripperDistance)) {
+		void (*gripperCallback)(int gripperDistance)) {
 	_gripperCallback = gripperCallback;
 }
 

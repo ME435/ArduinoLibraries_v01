@@ -18,7 +18,7 @@ class RobotAsciiCom
     void handleRxBytes(byte newRxBytes[], int length);
     void registerPositionCallback(void (* positionCallback)(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) );
     void registerJointAngleCallback(void (* jointAngleCallback)(byte jointNumber, int jointAngle) );
-    void registerGripperCallback(void (* gripperCallback)(byte gripperDistance) );
+    void registerGripperCallback(void (* gripperCallback)(int gripperDistance) );
     void registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void) );
 	void registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) );
   private:
@@ -26,7 +26,7 @@ class RobotAsciiCom
 	int _nextOpenByteInMessageBuffer;
     void (* _positionCallback)(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle);
     void (* _jointAngleCallback)(byte joint, int jointAngle);
-    void (* _gripperCallback)(byte gripperDistance);
+    void (* _gripperCallback)(int gripperDistance);
     void (* _batteryVoltageRequestCallback)(void);
     void (* _wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle);
     void _parseStringCommand(String command);

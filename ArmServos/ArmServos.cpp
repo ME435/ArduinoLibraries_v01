@@ -33,6 +33,7 @@ void ArmServos::_init() {
 }
 
 void ArmServos::attach() {
+	_updateServos();
 	_joint1Servo.attach(_joint1ServoPin);
 	_joint2Servo.attach(_joint2ServoPin);
 	_joint3Servo.attach(_joint3ServoPin);
@@ -40,7 +41,6 @@ void ArmServos::attach() {
 	_joint5Servo.attach(_joint5ServoPin);
 	_gripperServo.attach(_gripperServoPin);
 	delay(100);  // May not be required, but saw in example code.
-	_updateServos();
 }
 
 void ArmServos::_updateServos() {

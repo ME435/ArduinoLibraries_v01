@@ -17,6 +17,16 @@ void ArmServosSpeedControlled::_init() {
 	_millisecondsPerDegree[3] = DEFAULT_MILLISECONDS_PER_DEGREE_JOINT_3;
 	_millisecondsPerDegree[4] = DEFAULT_MILLISECONDS_PER_DEGREE_JOINT_4;
 	_millisecondsPerDegree[5] = DEFAULT_MILLISECONDS_PER_DEGREE_JOINT_5;
+	_targetJointAngles[1] = INITIAL_JOINT_1_ANGLE;
+	_targetJointAngles[2] = INITIAL_JOINT_2_ANGLE;
+	_targetJointAngles[3] = INITIAL_JOINT_3_ANGLE;
+	_targetJointAngles[4] = INITIAL_JOINT_4_ANGLE;
+	_targetJointAngles[5] = INITIAL_JOINT_5_ANGLE;
+	_moveStartTimes[1] = 0;
+	_moveStartTimes[2] = 0;
+	_moveStartTimes[3] = 0;
+	_moveStartTimes[4] = 0;
+	_moveStartTimes[5] = 0;
 }
 
 void ArmServosSpeedControlled::updateServos() {
@@ -62,10 +72,10 @@ int ArmServosSpeedControlled::_easeInOutAngle(int currentTimeMs, int totalMoveTi
   
   // Code from http://gizma.com/easing/
   // I added the cast back to an int the rest is used directly.
-  t /= d/2;
-  if (t < 1) return (int) (c/2*t*t*t + b);
-  t -= 2;
-  return (int) (c/2*(t*t*t + 2) + b);
+  t /= (d / 2.0);
+  if (t < 1.0) return (int) (c / 2.0 * t * t * t + b);
+  t -= 2.0;
+  return (int) (c / 2.0 * (t * t * t + 2.0) + b);
 }
 
 void ArmServosSpeedControlled::setPosition(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
@@ -89,10 +99,8 @@ void ArmServosSpeedControlled::setPosition(int joint1Angle, int joint2Angle, int
 }
 
 void ArmServosSpeedControlled::setJointAngle(byte jointNumber, int angle) {
-	_moveStartTimes[jointNumber] = millis();
-	_moveStartJointAngles[jointNumber] = _servoAngles[jointNumber];
 	_targetJointAngles[jointNumber] = angle;
-	updateServos();
+	ArmServos::setJointAngle(jointNumber, angle);  // Note, individual settings don't use speed control.
 }
 
 
