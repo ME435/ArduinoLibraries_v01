@@ -29,40 +29,29 @@ void ArmServosSpeedControlled::_init() {
 	_moveStartTimes[5] = 0;
 }
 
+// This function must be called regularly!  Moves happen in steps call more than once every 20mS for smoother results.
 void ArmServosSpeedControlled::updateServos() {
-  // Calculate the position of each joint using ease in and out
   int absoluteTimeMs = millis();
   int currentTimeMs, totalMoveTimeMs, totalMoveDistance, startValue;
-  
+
+  // Loop through each joint to see if any need to move.
   for (int i = 1; i < NUM_SERVOS; i++) {
 	  if (_targetJointAngles[i] != _servoAngles[i]) {	  
-		  // Joint is not at the target location.
+		  // Joint is not at the target location.  Time to move it a bit more.
 		  totalMoveDistance = _targetJointAngles[i] - _moveStartJointAngles[i];
-		  totalMoveTimeMs = abs(totalMoveDistance) * _millisecondsPerDegree[i]; // Slower than 180 mspd beware.
+		  totalMoveTimeMs = abs(totalMoveDistance) * _millisecondsPerDegree[i]; // Slower than 180 mspd beware of overflow.
 		  currentTimeMs = absoluteTimeMs - _moveStartTimes[i];
 		  if (currentTimeMs > totalMoveTimeMs) {
-			  _servoAngles[i] = _targetJointAngles[i];
+			  _servoAngles[i] = _targetJointAngles[i];   // Move is done.
 		  } else {
-//			  Serial.print("Joint ");
-//			  Serial.println(i);
-//			  Serial.print("currentTimeMs = ");
-//			  Serial.println(currentTimeMs);
-//			  Serial.print("totalMoveTimeMs = ");
-//			  Serial.println(totalMoveTimeMs);
-//			  Serial.print("totalMoveDistance = ");
-//			  Serial.println(totalMoveDistance);
-//			  Serial.print("_moveStartJointAngles[i] = ");
-//			  Serial.println(_moveStartJointAngles[i]);
+			  // Instead of doing a simple linear move, start slow and end slow (called ease-in ease-out)
 			  _servoAngles[i] = _easeInOutAngle(currentTimeMs, totalMoveTimeMs, totalMoveDistance, _moveStartJointAngles[i]);
-//			  Serial.print("Joint ");
-//			  Serial.print(i);
-//			  Serial.print(" to "); 
-//			  Serial.println(_servoAngles[i]);
 		  }
 	  }
   }
-  ArmServos::_updateServos();
+  ArmServos::_updateServos();  // Actually move the servos.
 }
+
 
 int ArmServosSpeedControlled::_easeInOutAngle(int currentTimeMs, int totalMoveTimeMs, int totalMoveDistance, int startValue) {
   float t = (float) currentTimeMs;
@@ -72,11 +61,13 @@ int ArmServosSpeedControlled::_easeInOutAngle(int currentTimeMs, int totalMoveTi
   
   // Code from http://gizma.com/easing/
   // I added the cast back to an int the rest is used directly.
+  // This is cubic easing in/out, but others work fine too.
   t /= (d / 2.0);
   if (t < 1.0) return (int) (c / 2.0 * t * t * t + b);
   t -= 2.0;
   return (int) (c / 2.0 * (t * t * t + 2.0) + b);
 }
+
 
 void ArmServosSpeedControlled::setPosition(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
 	int absoluteTimeMs = millis();
@@ -98,6 +89,7 @@ void ArmServosSpeedControlled::setPosition(int joint1Angle, int joint2Angle, int
 	updateServos();
 }
 
+
 void ArmServosSpeedControlled::setJointAngle(byte jointNumber, int angle) {
 	_targetJointAngles[jointNumber] = angle;
 	ArmServos::setJointAngle(jointNumber, angle);  // Note, individual settings don't use speed control.
@@ -108,6 +100,7 @@ void ArmServosSpeedControlled::setMillisecondsPerDegree(byte jointNumber, int mi
   _millisecondsPerDegree[jointNumber] = millisecondsPerDegree;
 }
 
+
 void ArmServosSpeedControlled::setAllMillisecondsPerDegree(int mspdJoint1, int mspdJoint2, int mspdJoint3, int mspdJoint4, int mspdJoint5) {
   _millisecondsPerDegree[1] = mspdJoint1;
   _millisecondsPerDegree[2] = mspdJoint2;
@@ -115,6 +108,7 @@ void ArmServosSpeedControlled::setAllMillisecondsPerDegree(int mspdJoint1, int m
   _millisecondsPerDegree[4] = mspdJoint4;
   _millisecondsPerDegree[5] = mspdJoint5;
 }
+
 
 int ArmServosSpeedControlled::getMillisecondsPerDegree(byte jointNumber) {
   return _millisecondsPerDegree[jointNumber];

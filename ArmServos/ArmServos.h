@@ -24,8 +24,8 @@
 class ArmServos
 {
   public:
-	ArmServos();
-	ArmServos(byte joint1ServoPin, byte joint2ServoPin, byte joint3ServoPin, byte joint4ServoPin, byte joint5ServoPin, byte gripperServoPin);
+    ArmServos();
+    ArmServos(byte joint1ServoPin, byte joint2ServoPin, byte joint3ServoPin, byte joint4ServoPin, byte joint5ServoPin, byte gripperServoPin);
     void attach();
     void setJointAngle(byte jointNumber, int angle);
     int getJointAngle(byte jointNumber);

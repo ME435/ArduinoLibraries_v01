@@ -21,7 +21,7 @@ void jointAngleCallback(byte jointNumber, int jointAngle) {
   armServos.setJointAngle(jointNumber, jointAngle);
 }
 
-void gripperCallback(byte gripperDistance) {
+void gripperCallback(int gripperDistance) {
   armServos.setGripperDistance(gripperDistance);
 }
 

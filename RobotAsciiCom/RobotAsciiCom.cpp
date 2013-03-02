@@ -30,7 +30,7 @@ void RobotAsciiCom::handleRxByte(byte newRxByte) {
 		// Convert the rx message buffer to a String and parse.
 		_rxMessageBuffer[_nextOpenByteInMessageBuffer] = '\0';
 		String rxStr = String(_rxMessageBuffer);
-		_parseStringCommand(rxStr);
+		_parseStringCommand(rxStr);  // The real work happens here.
 		_nextOpenByteInMessageBuffer = 0;
 	} else {
 		// Mid message.  Save the byte.
@@ -39,33 +39,41 @@ void RobotAsciiCom::handleRxByte(byte newRxByte) {
 	}
 }
 
+
 void RobotAsciiCom::registerPositionCallback(
 		void (*positionCallback)(int joint1Angle, int joint2Angle,
 				int joint3Angle, int joint4Angle, int joint5Angle)) {
 	_positionCallback = positionCallback;
 }
 
+
 void RobotAsciiCom::registerJointAngleCallback(
 		void (*jointAngleCallback)(byte jointNumber, int jointAngle)) {
 	_jointAngleCallback = jointAngleCallback;
 }
+
 
 void RobotAsciiCom::registerGripperCallback(
 		void (*gripperCallback)(int gripperDistance)) {
 	_gripperCallback = gripperCallback;
 }
 
+
 void RobotAsciiCom::registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void)) {
 	_batteryVoltageRequestCallback = batteryVoltageRequestCallback;
 }
+
 
 void RobotAsciiCom::registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle)) {
 	_wheelSpeedCallback = wheelSpeedCallback;
 }
 
+
+/**
+ * Process the complete message.
+ * TODO: This function is too big.  Break up the parsing of command to 6 helper functions.
+ */
 void RobotAsciiCom::_parseStringCommand(String command) {
-//	Serial.print("Command = ");
-//	Serial.println(command);
 	int spaceIndex = command.indexOf(' ');
 	String angleStr;
 	if (command.startsWith("POSITION")) {
@@ -119,7 +127,7 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		command = command.substring(spaceIndex + 1); // Removes the left duty cycle
 		
 		// Grab the right wheel parameters.
-		// Note, obviously this should be a function as it's the same as the above (lazy).
+		// Note, obviously this should be a function as it's basically the same as the above (lazy).
 		byte rightMode = WHEEL_SPEED_MODE_BRAKE;
 		if (command.startsWith("FORWARD")) {
 			rightMode = WHEEL_SPEED_MODE_FORWARD;
@@ -127,12 +135,10 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 			rightMode = WHEEL_SPEED_MODE_REVERSE;
 		}
 		spaceIndex = command.indexOf(' ');
-		command = command.substring(spaceIndex + 1); // Removes the right mode
-		spaceIndex = command.indexOf(' ');
-		String rightDutyCycleStr = command.substring(0, spaceIndex);
+		String rightDutyCycleStr = command.substring(spaceIndex + 1); // Removes the right mode
 		byte rightDutyCycle = (byte) (rightDutyCycleStr.toInt());		
 
-		// Inform the callback of the command.  Note, no error handling. :)
+		// Inform the callback of the command.  Note, no error handling.  Send legal messages. :)
 		if (_wheelSpeedCallback != NULL) {
 			_wheelSpeedCallback(leftMode, rightMode, leftDutyCycle, rightDutyCycle);
 		}

@@ -34,13 +34,13 @@ void ArmServos::_init() {
 
 void ArmServos::attach() {
 	_updateServos();
+	delay(100);  // Probably not be required, but I saw a delay in example code.
 	_joint1Servo.attach(_joint1ServoPin);
 	_joint2Servo.attach(_joint2ServoPin);
 	_joint3Servo.attach(_joint3ServoPin);
 	_joint4Servo.attach(_joint4ServoPin);
 	_joint5Servo.attach(_joint5ServoPin);
 	_gripperServo.attach(_gripperServoPin);
-	delay(100);  // May not be required, but saw in example code.
 }
 
 void ArmServos::_updateServos() {
@@ -71,20 +71,6 @@ void ArmServos::_updateServos() {
 	_joint4Servo.write(mappedJoint4Angle);
 	_joint5Servo.write(mappedJoint5Angle);
 	_gripperServo.write(mappedGripperDistance);
-
-//	Serial.print("Moving arm to ");
-//	Serial.print(mappedJoint1Angle);
-//	Serial.print(" ");
-//	Serial.print(mappedJoint2Angle);
-//	Serial.print(" ");
-//	Serial.print(mappedJoint3Angle);
-//	Serial.print(" ");
-//	Serial.print(mappedJoint4Angle);
-//	Serial.print(" ");
-//	Serial.print(mappedJoint5Angle);
-//	Serial.print(" gripper to ");
-//	Serial.print(mappedGripperDistance);
-//	Serial.println(".");
 }
 
 // For the common case of setting 5 joints at once.

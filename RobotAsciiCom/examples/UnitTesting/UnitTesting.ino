@@ -36,7 +36,7 @@ void jointAngleCallback(byte jointNumber, int jointAngle) {
   Serial.println();
 }
 
-void gripperCallback(byte gripperDistance) {
+void gripperCallback(int gripperDistance) {
   Serial.println();
   Serial.print("Gripper command to ");
   Serial.print(gripperDistance);
