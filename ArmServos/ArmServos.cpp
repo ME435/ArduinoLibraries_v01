@@ -63,7 +63,7 @@ void ArmServos::_updateServos() {
 	mappedJoint3Angle = constrain(mappedJoint3Angle, 0, 180);
 	mappedJoint4Angle = constrain(mappedJoint4Angle, 0, 180);
 	mappedJoint5Angle = constrain(mappedJoint5Angle, 0, 180);
-	mappedGripperDistance = constrain(mappedGripperDistance, 0, 180);
+	mappedGripperDistance = constrain(mappedGripperDistance, 20, 170);  // Avoiding extremes with that servo
 	// Update the output pins.
 	_joint1Servo.write(mappedJoint1Angle);
 	_joint2Servo.write(mappedJoint2Angle);
