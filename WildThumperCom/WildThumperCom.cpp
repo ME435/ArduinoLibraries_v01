@@ -133,7 +133,7 @@ void WildThumperCom::registerBatteryVoltageRequestCallback(
 
 
 void WildThumperCom::registerBatteryVoltageReplyCallback(
-		void (*batteryVoltageRequestCallback)(int batteryMillivolts)) {
+		void (*batteryVoltageReplyCallback)(int batteryMillivolts)) {
 	_batteryVoltageReplyCallback = batteryVoltageReplyCallback;
 }
 
@@ -199,7 +199,56 @@ void WildThumperCom::_parseValidMessage() {
 					_rxMessageBuffer[WHEEL_SPEED_LEFT_DUTY_CYCLE],
 					_rxMessageBuffer[WHEEL_SPEED_RIGHT_DUTY_CYCLE]);
 		}
+		break;	
+	case COMMAND_SET_ARM_POSITION:
+		if (_positionCallback != NULL) {
+			int joint1Angle = _rxMessageBuffer[SET_ARM_POSITION_JOINT_1_MSB];
+			joint1Angle = joint1Angle << 8;
+			joint1Angle += _rxMessageBuffer[SET_ARM_POSITION_JOINT_1_LSB];
+			int joint2Angle = _rxMessageBuffer[SET_ARM_POSITION_JOINT_2_MSB];
+			joint2Angle = joint2Angle << 8;
+			joint2Angle += _rxMessageBuffer[SET_ARM_POSITION_JOINT_2_LSB];
+			int joint3Angle = _rxMessageBuffer[SET_ARM_POSITION_JOINT_3_MSB];
+			joint3Angle = joint3Angle << 8;
+			joint3Angle += _rxMessageBuffer[SET_ARM_POSITION_JOINT_3_LSB];
+			int joint4Angle = _rxMessageBuffer[SET_ARM_POSITION_JOINT_4_MSB];
+			joint4Angle = joint4Angle << 8;
+			joint4Angle += _rxMessageBuffer[SET_ARM_POSITION_JOINT_4_LSB];
+			int joint5Angle = _rxMessageBuffer[SET_ARM_POSITION_JOINT_5_MSB];
+			joint5Angle = joint5Angle << 8;
+			joint5Angle += _rxMessageBuffer[SET_ARM_POSITION_JOINT_5_LSB];
+			_positionCallback(joint1Angle, joint2Angle, joint3Angle, joint4Angle, joint5Angle);
+		}
 		break;
+	case COMMAND_SET_JOINT_ANGLE:
+		if (_jointAngleCallback != NULL) {
+			int jointAngle = _rxMessageBuffer[SET_JOINT_ANGLE_ANGLE_MSB];
+			jointAngle = jointAngle << 8;
+			jointAngle += _rxMessageBuffer[SET_JOINT_ANGLE_ANGLE_LSB];
+			_jointAngleCallback(_rxMessageBuffer[SET_JOINT_ANGLE_JOINT_NUMBER], jointAngle);
+		}
+		break;
+	case COMMAND_SET_GRIPPER_DISTANCE:
+		if (_gripperCallback != NULL) {
+			int gripperDistance = _rxMessageBuffer[SET_GRIPPER_DISTANCE_MSB];
+			gripperDistance = gripperDistance << 8;
+			gripperDistance += _rxMessageBuffer[SET_GRIPPER_DISTANCE_LSB];
+			_gripperCallback(gripperDistance);
+		}
+		break;
+	case COMMAND_BATTERY_VOLTAGE_REQUEST:
+		if (_batteryVoltageRequestCallback != NULL) {
+			_batteryVoltageRequestCallback();
+		}
+		break;
+	case COMMAND_BATTERY_VOLTAGE_REPLY:
+		if (_batteryVoltageReplyCallback != NULL) {
+			int batteryVoltageMillivolts = _rxMessageBuffer[BATTERY_VOLTAGE_REPLY_MSB];
+			batteryVoltageMillivolts = batteryVoltageMillivolts << 8;
+			batteryVoltageMillivolts += _rxMessageBuffer[BATTERY_VOLTAGE_REPLY_LSB];
+			_batteryVoltageReplyCallback(batteryVoltageMillivolts);			
+		}
+		break;	
 	default:
 		// Silently do nothing with unknown commands
 		break;
