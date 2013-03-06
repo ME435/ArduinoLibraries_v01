@@ -1,4 +1,15 @@
 WildThumperCom	KEYWORD1
 sendWheelSpeed	KEYWORD2
+sendPosition	KEYWORD2
+sendJointAngle	KEYWORD2
+sendGripperDistance	KEYWORD2
+sendBatteryVoltageRequest	KEYWORD2
+sendBatteryVoltageReply		KEYWORD2
 registerWheelSpeedCallback	KEYWORD2
+registerPositionCallback	KEYWORD2
+registerJointAngleCallback	KEYWORD2
+registerGripperCallback	KEYWORD2
+registerBatteryVoltageRequestCallback	KEYWORD2
+registerBatteryVoltageReplyCallback		KEYWORD2
 handleRxByte	KEYWORD2
+
