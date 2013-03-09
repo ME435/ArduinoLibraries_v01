@@ -1,8 +1,9 @@
 #include <LiquidCrystal.h>
 #include <Servo.h>
 #include <ArmServos.h>
+#include <ArmServosSpeedControlled.h>
 
-ArmServos robotArm;
+ArmServosSpeedControlled robotArm;
 
 /***  Pin I/O   ***/ 
 #define PIN_LED_1 64
@@ -147,7 +148,11 @@ void loop() {
   
   updateLcd();
   updateServos();
-  delay(100);
+  unsigned long startTime = millis();
+  while (millis() - startTime < 100) {
+    robotArm.updateServos();
+  }
+//  delay(100);
 }
 
 void updateLeds() {
@@ -201,12 +206,17 @@ void updateLcd() {
 }
 
 void updateServos() {
-  robotArm.setPosition(servoAngles[1],
-      servoAngles[2],
-      servoAngles[3],
-      servoAngles[4],
-      servoAngles[5]);
-  // Could've also used individual joint angle commands.
+  if(robotArm.getJointAngle(1) != servoAngles[1] || robotArm.getJointAngle(2) != servoAngles[2] || 
+     robotArm.getJointAngle(3) != servoAngles[3] || robotArm.getJointAngle(4) != servoAngles[4] || 
+     robotArm.getJointAngle(5) != servoAngles[5]) {
+    robotArm.setPosition(servoAngles[1],
+        servoAngles[2],
+        servoAngles[3],
+        servoAngles[4],
+        servoAngles[5]);
+  }
+
+  // Setting the joint angles individually works differently.
 //  robotArm.setJointAngle(1, servoAngles[1]);
 //  robotArm.setJointAngle(2, servoAngles[2]);
 //  robotArm.setJointAngle(3, servoAngles[3]);
