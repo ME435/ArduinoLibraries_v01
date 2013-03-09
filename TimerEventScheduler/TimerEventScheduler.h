@@ -2,12 +2,13 @@
 #define TimerEventScheduler_h
 
 /**
- * Adds timer events to an array and calls the callback function when it counts to zero.
+ * Creates a mechanism to schedule timer events.  Creates a callback using Timer2
+ * that overflows every 1 ms.  Every overflow the timer events get closer to being
+ * called.  When a Timer Event in the array hits 0 timer ticks remaining a callback
+ * function is called.  The return value of the callback sets the next timer ticks
+ * remaining value so the callback can be called again.
  * 
- * TODO: Improve this discription.
- * 
- * Note, I don't know C++.  Ooops.
- * I only know C.  So I made a dynamic array of pointers using C technics (no C++ used).
+ * Note, uses C, instead of C++, technics for the dynamic array of pointers.
  */
 
 #include "Arduino.h"

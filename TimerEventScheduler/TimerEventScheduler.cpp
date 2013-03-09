@@ -1,29 +1,36 @@
 #include "Arduino.h"
 #include "TimerEventScheduler.h"
 
-volatile unsigned int _tcnt2;
+volatile byte _tcnt2;
 TimerEvent **_timerEventTable;  // Array of pointers to TimerEvents.
 int _timerEventTableSize;
 int _timerEventTableCapacity;
+boolean _timerSetupComplete = false;
 
-void _tick(void);  // Made global for ISR.
-	
+void _timer2OverflowISR(void);  // Made global for ISR.
+
+// Create a Timer Event Table that is managed by the scheduler.
+// A TimerEventScheduler has a Timer Event Table.
 TimerEventScheduler::TimerEventScheduler() {
 	_timerEventTableSize = 0;
 	_timerEventTableCapacity = INITIAL_TIMER_EVENT_TABLE_CAPACITY;
 	_timerEventTable = (TimerEvent **) malloc(
-			INITIAL_TIMER_EVENT_TABLE_CAPACITY * sizeof(TimerEvent *));
+			_timerEventTableCapacity * sizeof(TimerEvent *));
 	if (_timerEventTable == NULL) {
 		while (1) {
 			Serial.println("Did not malloc space for the timer event table.");
 		};  // If the chip fails to allocate memory trap here for debug.
 	}
-	_setupTimer2();
-	_start();
 }
 
-
-void _tick(void) {
+/**
+ * Function that is called when Timer2 overflows (which happen every 1 mS)
+ * 
+ * Decrements the timer ticks remaining on all active Timer Events.
+ * If a Timer Event hits 0 then call the callback function.
+ * The return value from the callback function sets the next callback.
+ */ 
+void _timer2OverflowISR(void) {
 	int ticksRemaining;
 	for (int tableIndex = 0; tableIndex < _timerEventTableSize; tableIndex++) {
 		ticksRemaining = _timerEventTable[tableIndex]->getTimerTicksRemaining();
@@ -34,38 +41,30 @@ void _tick(void) {
 			if (ticksRemaining == 0) {
 				// Just now the count reached zero, call the callback
 				ticksRemaining = _timerEventTable[tableIndex]->timerEventCallback();
-				
-				// Hack. Hack. Hack. Hack alert.  Added experimentally. :)
-				// Not sure why but my timer is at half speed.
-				// Easy to just divid my milliseconds requested by 2 (some error).
-				// Done in another place too.
-				ticksRemaining /= 2;
-				
 				_timerEventTable[tableIndex]->setTimerTicksRemaining(ticksRemaining);
 			}
 		}
 	}
 }
 
-
+// Add a new Timer Event to the Timer Event Table.
 void TimerEventScheduler::addTimerEvent(TimerEvent *timerEventPtr) {
+	// Note, this was intentionally NOT done in the constructor.
+	// Things in the constructor happen to early for timer setup to work right.
+	if (!_timerSetupComplete){
+		_setupTimer2();
+		_start();
+		_timerSetupComplete = true;
+	}
 	int timerEventIndex = _getNextTableIndex();
 	_timerEventTable[timerEventIndex] = timerEventPtr;
-	
-
-	// Hack. Hack. Hack. Hack alert.  Added experimentally. :)
-	// Not sure why but my timer is at half speed.
-	// Easy to just divid my milliseconds requested by 2 (some error).
-	// Done in another place too.
-	int ticksRemaining = timerEventPtr->getTimerTicksRemaining();
-	ticksRemaining /= 2;
-	timerEventPtr->setTimerTicksRemaining(ticksRemaining);
 }
 
+// Increase the size of the Timer Event Table.
 void TimerEventScheduler::_doubleTimerEventTableCapacity(void) {
 	_timerEventTableCapacity *= 2;
 	_timerEventTable = (TimerEvent **) realloc(_timerEventTable,
-			_timerEventTableSize * sizeof(TimerEvent *));
+			_timerEventTableCapacity * sizeof(TimerEvent *));
 	if (_timerEventTable == NULL) {
 		while (1) {
 			Serial.println("Did not realloc space for the timer event table.");
@@ -73,6 +72,7 @@ void TimerEventScheduler::_doubleTimerEventTableCapacity(void) {
 	}
 }
 
+// Get the next open index in the Timer Event Table.
 int TimerEventScheduler::_getNextTableIndex(void) {
 	int nextTableIndex = _timerEventTableSize;
 	_timerEventTableSize++;
@@ -86,7 +86,7 @@ int TimerEventScheduler::_getNextTableIndex(void) {
 // ---------------- from http://playground.arduino.cc/Main/MsTimer2 ------------
 // ---------- written by Javier Valencia <javiervalencia80@gmail.com> ----------
 
-
+// Setup Timer 2 to overflow every 1 ms.
 void TimerEventScheduler::_setupTimer2() {
 	float prescaler = 0.0;
 
@@ -96,7 +96,7 @@ void TimerEventScheduler::_setupTimer2() {
 	TCCR2B &= ~(1<<WGM22);
 	ASSR &= ~(1<<AS2);
 	TIMSK2 &= ~(1<<OCIE2A);
-
+	
 	if ((F_CPU >= 1000000UL) && (F_CPU <= 16000000UL)) {	// prescaler set to 64
 		TCCR2B |= (1<<CS22);
 		TCCR2B &= ~((1<<CS21) | (1<<CS20));
@@ -115,7 +115,7 @@ void TimerEventScheduler::_setupTimer2() {
 	TCCR2 &= ~((1<<WGM21) | (1<<WGM20));
 	TIMSK &= ~(1<<OCIE2);
 	ASSR &= ~(1<<AS2);
-
+	
 	if ((F_CPU >= 1000000UL) && (F_CPU <= 16000000UL)) {	// prescaler set to 64
 		TCCR2 |= (1<<CS22);
 		TCCR2 &= ~((1<<CS21) | (1<<CS20));
@@ -133,7 +133,7 @@ void TimerEventScheduler::_setupTimer2() {
 	TIMSK &= ~(1<<TOIE2);
 	TCCR2 &= ~((1<<WGM21) | (1<<WGM20));
 	TIMSK &= ~(1<<OCIE2);
-
+	
 	if ((F_CPU >= 1000000UL) && (F_CPU <= 16000000UL)) {	// prescaler set to 64
 		TCCR2 |= ((1<<CS21) | (1<<CS20));
 		TCCR2 &= ~(1<<CS22);
@@ -182,7 +182,7 @@ void TimerEventScheduler::_setupTimer2() {
 #error Unsupported CPU type
 #endif
 
-	_tcnt2 = 256 - (int) ((float) F_CPU * 0.001 / prescaler);
+	_tcnt2 = 256 - (int)((float)F_CPU * 0.001 / prescaler);
 }
 
 void TimerEventScheduler::_start() {
@@ -228,6 +228,6 @@ ISR(TIMER2_OVF_vect) {
 #elif defined (__AVR_ATmega32U4__)
 	// not necessary on 32u4's high speed timer4
 #endif
-	_tick();
+	_timer2OverflowISR(); // Overflow function called every 1 ms.
 }
 
