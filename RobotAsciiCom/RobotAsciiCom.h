@@ -21,6 +21,7 @@ class RobotAsciiCom
     void registerJointAngleCallback(void (* jointAngleCallback)(byte jointNumber, int jointAngle) );
     void registerGripperCallback(void (* gripperCallback)(int gripperDistance) );
     void registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void) );
+    void registerWheelCurrentRequestCallback(void (* wheelCurrentRequestCallback)(void) );
 	void registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) );
   private:
     char _rxMessageBuffer[MAX_ASCII_MESSAGE_LENGTH];
@@ -29,6 +30,7 @@ class RobotAsciiCom
     void (* _jointAngleCallback)(byte joint, int jointAngle);
     void (* _gripperCallback)(int gripperDistance);
     void (* _batteryVoltageRequestCallback)(void);
+    void (* _wheelCurrentRequestCallback)(void);
     void (* _wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle);
     void _parseStringCommand(String command);
 };

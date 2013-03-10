@@ -14,6 +14,7 @@ registerPositionCallback	KEYWORD2
 registerJointAngleCallback	KEYWORD2
 registerGripperCallback	KEYWORD2  
 registerBatteryVoltageRequestCallback	KEYWORD2    
+registerWheelCurrentRequestCallback	KEYWORD2    
 registerWheelSpeedCallback	KEYWORD2  
 
 #######################################

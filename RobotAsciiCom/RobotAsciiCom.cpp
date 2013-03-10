@@ -7,6 +7,7 @@ RobotAsciiCom::RobotAsciiCom() {
 	_jointAngleCallback = NULL;
 	_gripperCallback = NULL;
 	_batteryVoltageRequestCallback = NULL;
+	_wheelCurrentRequestCallback = NULL;
 	_wheelSpeedCallback = NULL;
 }
 
@@ -39,39 +40,42 @@ void RobotAsciiCom::handleRxByte(byte newRxByte) {
 	}
 }
 
-
 void RobotAsciiCom::registerPositionCallback(
 		void (*positionCallback)(int joint1Angle, int joint2Angle,
 				int joint3Angle, int joint4Angle, int joint5Angle)) {
 	_positionCallback = positionCallback;
 }
 
-
 void RobotAsciiCom::registerJointAngleCallback(
 		void (*jointAngleCallback)(byte jointNumber, int jointAngle)) {
 	_jointAngleCallback = jointAngleCallback;
 }
-
 
 void RobotAsciiCom::registerGripperCallback(
 		void (*gripperCallback)(int gripperDistance)) {
 	_gripperCallback = gripperCallback;
 }
 
-
-void RobotAsciiCom::registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void)) {
+void RobotAsciiCom::registerBatteryVoltageRequestCallback(
+		void (*batteryVoltageRequestCallback)(void)) {
 	_batteryVoltageRequestCallback = batteryVoltageRequestCallback;
 }
 
+void RobotAsciiCom::registerWheelCurrentRequestCallback(
+		void (*wheelCurrentRequestCallback)(void)) {
+	_wheelCurrentRequestCallback = wheelCurrentRequestCallback;
+}
 
-void RobotAsciiCom::registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle)) {
+void RobotAsciiCom::registerWheelSpeedCallback(
+		void (*wheelSpeedCallback)(byte leftMode, byte rightMode,
+				byte leftDutyCycle, byte rightDutyCycle)) {
 	_wheelSpeedCallback = wheelSpeedCallback;
 }
 
-
 /**
  * Process the complete message.
- * TODO: This function is too big.  Break up the parsing of command to 6 helper functions.
+ * CONSIDER: This function is too big.  
+ *     Break up the POSITION and WHEEL SPEED commands to helper functions.
  */
 void RobotAsciiCom::_parseStringCommand(String command) {
 	int spaceIndex = command.indexOf(' ');
@@ -101,17 +105,21 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		int lastSpaceIndex = command.lastIndexOf(' ');
 		angleStr = command.substring(lastSpaceIndex + 1);
 		if (_jointAngleCallback != NULL) {
-			_jointAngleCallback((byte) (jointNumStr.toInt()), angleStr.toInt());
+			_jointAngleCallback((byte)(jointNumStr.toInt()), angleStr.toInt());
 		}
 	} else if (command.startsWith("BATTERY VOLTAGE REQUEST")) {
 		if (_batteryVoltageRequestCallback != NULL) {
 			_batteryVoltageRequestCallback();
 		}
+	} else if (command.startsWith("WHEEL CURRENT REQUEST")) {
+		if (_wheelCurrentRequestCallback != NULL) {
+			_wheelCurrentRequestCallback();
+		}
 	} else if (command.startsWith("WHEEL SPEED")) {
 		command = command.substring(spaceIndex + 1); // Removes the word WHEEL
 		spaceIndex = command.indexOf(' ');
 		command = command.substring(spaceIndex + 1); // Removes the word SPEED
-		
+
 		// Grab the left wheel parameters.
 		byte leftMode = WHEEL_SPEED_MODE_BRAKE;
 		if (command.startsWith("FORWARD")) {
@@ -123,9 +131,9 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		command = command.substring(spaceIndex + 1); // Removes the left mode
 		spaceIndex = command.indexOf(' ');
 		String leftDutyCycleStr = command.substring(0, spaceIndex);
-		byte leftDutyCycle = (byte) (leftDutyCycleStr.toInt());
+		byte leftDutyCycle = (byte)(leftDutyCycleStr.toInt());
 		command = command.substring(spaceIndex + 1); // Removes the left duty cycle
-		
+
 		// Grab the right wheel parameters.
 		// Note, obviously this should be a function as it's basically the same as the above (lazy).
 		byte rightMode = WHEEL_SPEED_MODE_BRAKE;
@@ -136,11 +144,12 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		}
 		spaceIndex = command.indexOf(' ');
 		String rightDutyCycleStr = command.substring(spaceIndex + 1); // Removes the right mode
-		byte rightDutyCycle = (byte) (rightDutyCycleStr.toInt());		
+		byte rightDutyCycle = (byte)(rightDutyCycleStr.toInt());
 
 		// Inform the callback of the command.  Note, no error handling.  Send legal messages. :)
 		if (_wheelSpeedCallback != NULL) {
-			_wheelSpeedCallback(leftMode, rightMode, leftDutyCycle, rightDutyCycle);
+			_wheelSpeedCallback(leftMode, rightMode, leftDutyCycle,
+					rightDutyCycle);
 		}
 	}
 }
