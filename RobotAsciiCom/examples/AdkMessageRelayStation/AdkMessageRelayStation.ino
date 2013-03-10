@@ -185,7 +185,7 @@ void wheelCurrentReplyFromThumper(int leftWheelMotorsMilliamps, int rightWheelMo
       leftWheelMotorsMilliamps / 1000, leftWheelMotorsMilliamps % 1000,
       rightWheelMotorsMilliamps / 1000, rightWheelMotorsMilliamps % 1000);  
   
-  // Display battery voltage on LCD.
+  // Display wheel currents on LCD.
   lcd.clear();
   lcd.print("Wheel current:");
   lcd.setCursor(0, LINE_2);
