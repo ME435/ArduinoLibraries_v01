@@ -5,7 +5,6 @@ volatile byte _tcnt2;
 TimerEvent **_timerEventTable;  // Array of pointers to TimerEvents.
 int _timerEventTableSize;
 int _timerEventTableCapacity;
-boolean _timerSetupComplete = false;
 
 void _timer2OverflowISR(void);  // Made global for ISR.
 
@@ -49,12 +48,12 @@ void _timer2OverflowISR(void) {
 
 // Add a new Timer Event to the Timer Event Table.
 void TimerEventScheduler::addTimerEvent(TimerEvent *timerEventPtr) {
-	// Note, this was intentionally NOT done in the constructor.
-	// Things in the constructor happen to early for timer setup to work right.
-	if (!_timerSetupComplete){
+	if (_timerEventTableSize == 0) {
+		// First Timer Event added.  Start Timer2.
+		// Note, this was intentionally NOT done in the constructor.
+		// Things in the constructor happen too early for timer setup to work right.
 		_setupTimer2();
 		_start();
-		_timerSetupComplete = true;
 	}
 	int timerEventIndex = _getNextTableIndex();
 	_timerEventTable[timerEventIndex] = timerEventPtr;

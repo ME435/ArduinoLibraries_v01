@@ -1,16 +1,20 @@
 #include "Arduino.h"
 #include "WildThumperCom.h"
 
-
 WildThumperCom::WildThumperCom(byte teamNumber) {
 	_teamNumber = teamNumber;
 	_wheelSpeedCallback = NULL;
+	_positionCallback = NULL;
+	_jointAngleCallback = NULL;
+	_gripperCallback = NULL;
+	_batteryVoltageRequestCallback = NULL;
+	_batteryVoltageReplyCallback = NULL;
+	_wheelCurrentRequestCallback = NULL;
+	_wheelCurrentReplyCallback = NULL;
 	_lastByteWasStartByte = false;
 	_lastByteWasEscapeByte = false;
 	_bytesRemainingInMessage = -1;
-
 }
-
 
 void WildThumperCom::sendWheelSpeed(byte leftMode, byte rightMode,
 		byte leftDutyCycle, byte rightDutyCycle) {
@@ -22,7 +26,6 @@ void WildThumperCom::sendWheelSpeed(byte leftMode, byte rightMode,
 	_txMessageBuffer[WHEEL_SPEED_RIGHT_DUTY_CYCLE] = rightDutyCycle;
 	_sendMessage (WHEEL_SPEED_MESSAGE_LENGTH);
 }
-
 
 void WildThumperCom::sendPosition(int joint1Angle, int joint2Angle,
 		int joint3Angle, int joint4Angle, int joint5Angle) {
@@ -41,7 +44,6 @@ void WildThumperCom::sendPosition(int joint1Angle, int joint2Angle,
 	_sendMessage (SET_ARM_POSITION_LENGTH);
 }
 
-
 void WildThumperCom::sendJointAngle(byte jointNumber, int jointAngle) {
 	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
 	_txMessageBuffer[COMMAND_BYTE] = COMMAND_SET_JOINT_ANGLE;
@@ -51,7 +53,6 @@ void WildThumperCom::sendJointAngle(byte jointNumber, int jointAngle) {
 	_sendMessage (SET_JOINT_ANGLE_LENGTH);
 }
 
-
 void WildThumperCom::sendGripperDistance(int gripperDistance) {
 	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
 	_txMessageBuffer[COMMAND_BYTE] = COMMAND_SET_GRIPPER_DISTANCE;
@@ -60,13 +61,11 @@ void WildThumperCom::sendGripperDistance(int gripperDistance) {
 	_sendMessage (SET_GRIPPER_DISTANCE_LENGTH);
 }
 
-
 void WildThumperCom::sendBatteryVoltageRequest() {
 	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
 	_txMessageBuffer[COMMAND_BYTE] = COMMAND_BATTERY_VOLTAGE_REQUEST;
 	_sendMessage (BATTERY_VOLTAGE_REQUEST_LENGTH);
 }
-
 
 void WildThumperCom::sendBatteryVoltageReply(int batteryMillivolts) {
 	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
@@ -77,6 +76,26 @@ void WildThumperCom::sendBatteryVoltageReply(int batteryMillivolts) {
 	_sendMessage (BATTERY_VOLTAGE_REPLY_LENGTH);
 }
 
+void WildThumperCom::sendWheelCurrentRequest() {
+	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
+	_txMessageBuffer[COMMAND_BYTE] = COMMAND_WHEEL_CURRENT_REQUEST;
+	_sendMessage (WHEEL_CURRENT_REQUEST_LENGTH);
+}
+
+void WildThumperCom::sendWheelCurrentReply(int leftWheelMotorsMilliamps,
+		int rightWheelMotorsMilliamps) {
+	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
+	_txMessageBuffer[COMMAND_BYTE] = COMMAND_WHEEL_CURRENT_REPLY;
+	_txMessageBuffer[WHEEL_CURRENT_REPLY_LEFT_LSB] =
+			(byte) leftWheelMotorsMilliamps;
+	_txMessageBuffer[WHEEL_CURRENT_REPLY_LEFT_MSB] = (byte)(
+			leftWheelMotorsMilliamps >> 8);
+	_txMessageBuffer[WHEEL_CURRENT_REPLY_RIGHT_LSB] =
+			(byte) rightWheelMotorsMilliamps;
+	_txMessageBuffer[WHEEL_CURRENT_REPLY_RIGHT_MSB] = (byte)(
+			rightWheelMotorsMilliamps >> 8);
+	_sendMessage (WHEEL_CURRENT_REPLY_LENGTH);
+}
 
 void WildThumperCom::_sendMessage(byte messageLength) {
 	byte crc = 0;
@@ -89,7 +108,6 @@ void WildThumperCom::_sendMessage(byte messageLength) {
 	_sendByte(-crc);
 }
 
-
 void WildThumperCom::_sendByte(byte unescapedbyte) {
 	if (unescapedbyte == START_BYTE || unescapedbyte == ESCAPE_BYTE) {
 		Serial.write(ESCAPE_BYTE);
@@ -99,13 +117,11 @@ void WildThumperCom::_sendByte(byte unescapedbyte) {
 	}
 }
 
-
 void WildThumperCom::registerWheelSpeedCallback(
 		void (*wheelSpeedCallback)(byte leftMode, byte rightMode,
 				byte leftDutyCycle, byte rightDutyCycle)) {
 	_wheelSpeedCallback = wheelSpeedCallback;
 }
-
 
 void WildThumperCom::registerPositionCallback(
 		void (*positionCallback)(int joint1Angle, int joint2Angle,
@@ -113,30 +129,36 @@ void WildThumperCom::registerPositionCallback(
 	_positionCallback = positionCallback;
 }
 
-
 void WildThumperCom::registerJointAngleCallback(
 		void (*jointAngleCallback)(byte jointNumber, int jointAngle)) {
 	_jointAngleCallback = jointAngleCallback;
 }
-
 
 void WildThumperCom::registerGripperCallback(
 		void (*gripperCallback)(int gripperDistance)) {
 	_gripperCallback = gripperCallback;
 }
 
-
 void WildThumperCom::registerBatteryVoltageRequestCallback(
 		void (*batteryVoltageRequestCallback)(void)) {
 	_batteryVoltageRequestCallback = batteryVoltageRequestCallback;
 }
-
 
 void WildThumperCom::registerBatteryVoltageReplyCallback(
 		void (*batteryVoltageReplyCallback)(int batteryMillivolts)) {
 	_batteryVoltageReplyCallback = batteryVoltageReplyCallback;
 }
 
+void WildThumperCom::registerWheelCurrentRequestCallback(
+		void (*wheelCurrentRequestCallback)(void)) {
+	_wheelCurrentRequestCallback = wheelCurrentRequestCallback;
+}
+
+void WildThumperCom::registerWheelCurrentReplyCallback(
+		void (*wheelCurrentReplyCallback)(int leftWheelMotorsMilliamps,
+				int rightWheelMotorsMilliamps)) {
+	_wheelCurrentReplyCallback = wheelCurrentReplyCallback;
+}
 
 void WildThumperCom::handleRxByte(byte newRxByte) {
 	// Highest priority is the start byte.
@@ -184,7 +206,6 @@ void WildThumperCom::handleRxByte(byte newRxByte) {
 	_bytesRemainingInMessage--;
 }
 
-
 void WildThumperCom::_parseValidMessage() {
 	byte teamNumber = _rxMessageBuffer[TEAM_NUMBER_BYTE];
 	if (teamNumber != _teamNumber) {
@@ -199,7 +220,7 @@ void WildThumperCom::_parseValidMessage() {
 					_rxMessageBuffer[WHEEL_SPEED_LEFT_DUTY_CYCLE],
 					_rxMessageBuffer[WHEEL_SPEED_RIGHT_DUTY_CYCLE]);
 		}
-		break;	
+		break;
 	case COMMAND_SET_ARM_POSITION:
 		if (_positionCallback != NULL) {
 			int joint1Angle = _rxMessageBuffer[SET_ARM_POSITION_JOINT_1_MSB];
@@ -217,7 +238,8 @@ void WildThumperCom::_parseValidMessage() {
 			int joint5Angle = _rxMessageBuffer[SET_ARM_POSITION_JOINT_5_MSB];
 			joint5Angle = joint5Angle << 8;
 			joint5Angle += _rxMessageBuffer[SET_ARM_POSITION_JOINT_5_LSB];
-			_positionCallback(joint1Angle, joint2Angle, joint3Angle, joint4Angle, joint5Angle);
+			_positionCallback(joint1Angle, joint2Angle, joint3Angle,
+					joint4Angle, joint5Angle);
 		}
 		break;
 	case COMMAND_SET_JOINT_ANGLE:
@@ -225,7 +247,8 @@ void WildThumperCom::_parseValidMessage() {
 			int jointAngle = _rxMessageBuffer[SET_JOINT_ANGLE_ANGLE_MSB];
 			jointAngle = jointAngle << 8;
 			jointAngle += _rxMessageBuffer[SET_JOINT_ANGLE_ANGLE_LSB];
-			_jointAngleCallback(_rxMessageBuffer[SET_JOINT_ANGLE_JOINT_NUMBER], jointAngle);
+			_jointAngleCallback(_rxMessageBuffer[SET_JOINT_ANGLE_JOINT_NUMBER],
+					jointAngle);
 		}
 		break;
 	case COMMAND_SET_GRIPPER_DISTANCE:
@@ -243,12 +266,14 @@ void WildThumperCom::_parseValidMessage() {
 		break;
 	case COMMAND_BATTERY_VOLTAGE_REPLY:
 		if (_batteryVoltageReplyCallback != NULL) {
-			int batteryVoltageMillivolts = _rxMessageBuffer[BATTERY_VOLTAGE_REPLY_MSB];
+			int batteryVoltageMillivolts =
+					_rxMessageBuffer[BATTERY_VOLTAGE_REPLY_MSB];
 			batteryVoltageMillivolts = batteryVoltageMillivolts << 8;
-			batteryVoltageMillivolts += _rxMessageBuffer[BATTERY_VOLTAGE_REPLY_LSB];
-			_batteryVoltageReplyCallback(batteryVoltageMillivolts);			
+			batteryVoltageMillivolts +=
+					_rxMessageBuffer[BATTERY_VOLTAGE_REPLY_LSB];
+			_batteryVoltageReplyCallback(batteryVoltageMillivolts);
 		}
-		break;	
+		break;
 	default:
 		// Silently do nothing with unknown commands
 		break;

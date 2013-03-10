@@ -20,6 +20,8 @@
 #define COMMAND_SET_GRIPPER_DISTANCE     4
 #define COMMAND_BATTERY_VOLTAGE_REQUEST  5
 #define COMMAND_BATTERY_VOLTAGE_REPLY    6
+#define COMMAND_WHEEL_CURRENT_REQUEST    7
+#define COMMAND_WHEEL_CURRENT_REPLY      8
 
 // Bytes within commands
 #define WHEEL_SPEED_MESSAGE_LENGTH		6
@@ -53,7 +55,6 @@
 #define SET_GRIPPER_DISTANCE_LSB 2
 #define SET_GRIPPER_DISTANCE_MSB 3
 
-
 #define BATTERY_VOLTAGE_REQUEST_LENGTH 2
 // TEAM_NUMBER_BYTE is 0, COMMAND_BYTE is 1
 
@@ -62,6 +63,15 @@
 #define BATTERY_VOLTAGE_REPLY_LSB 2
 #define BATTERY_VOLTAGE_REPLY_MSB 3
 
+#define WHEEL_CURRENT_REQUEST_LENGTH 2
+// TEAM_NUMBER_BYTE is 0, COMMAND_BYTE is 1
+
+#define WHEEL_CURRENT_REPLY_LENGTH 6
+// TEAM_NUMBER_BYTE is 0, COMMAND_BYTE is 1
+#define WHEEL_CURRENT_REPLY_LEFT_LSB 2
+#define WHEEL_CURRENT_REPLY_LEFT_MSB 3
+#define WHEEL_CURRENT_REPLY_RIGHT_LSB 4
+#define WHEEL_CURRENT_REPLY_RIGHT_MSB 5
 
 class WildThumperCom
 {
@@ -72,13 +82,17 @@ class WildThumperCom
 	void sendJointAngle(byte jointNumber, int jointAngle);
 	void sendGripperDistance(int gripperDistance);
 	void sendBatteryVoltageRequest();
-	void sendBatteryVoltageReply(int batteryMillivolts);	
+	void sendBatteryVoltageReply(int batteryMillivolts);
+	void sendWheelCurrentRequest();
+	void sendWheelCurrentReply(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps);
 	void registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) );
     void registerPositionCallback(void (* positionCallback)(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) );
     void registerJointAngleCallback(void (* jointAngleCallback)(byte jointNumber, int jointAngle) );
     void registerGripperCallback(void (* gripperCallback)(int gripperDistance) );
     void registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void) );
     void registerBatteryVoltageReplyCallback(void (* batteryVoltageReplyCallback)(int batteryMillivolts) );	
+    void registerWheelCurrentRequestCallback(void (* wheelCurrentRequestCallback)(void) );
+    void registerWheelCurrentReplyCallback(void (* wheelCurrentReplyCallback)(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps) );	
 	void handleRxByte(byte newRxByte);
   private:
 	byte _teamNumber;
@@ -92,6 +106,8 @@ class WildThumperCom
     void (* _gripperCallback)(int gripperDistance);
     void (* _batteryVoltageRequestCallback)(void);
     void (* _batteryVoltageReplyCallback)(int batteryMillivolts);
+    void (* _wheelCurrentRequestCallback)(void);
+    void (* _wheelCurrentReplyCallback)(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps);
 	boolean _lastByteWasStartByte;
 	boolean _lastByteWasEscapeByte;
 	int _bytesRemainingInMessage;
