@@ -23,6 +23,8 @@ class RobotAsciiCom
     void registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void) );
     void registerWheelCurrentRequestCallback(void (* wheelCurrentRequestCallback)(void) );
 	void registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) );
+	int prepareBatteryVoltageReply(int batteryMillivolts, char buf[], int maxLength);
+	int prepareWheelCurrentReply(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps, char buf[], int maxLength);
   private:
     char _rxMessageBuffer[MAX_ASCII_MESSAGE_LENGTH];
     int _nextOpenByteInMessageBuffer;

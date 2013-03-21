@@ -18,17 +18,11 @@ AndroidAccessory acc(manufacturer,
                      versionStr,
                      "https://sites.google.com/site/me435spring2013/",
                      "12345");
-byte rxBuf[255];
-byte txBuf[64];
-#define BATTERY_VOLTAGE_REPLY_LENGTH 27
-// 123456789012345678901234567
-// BATTERY VOLTAGE REPLY 1.234
-// BATTERY VOLTAGE REPLY %d.%03d"
-#define WHEEL_CURRENT_REPLY_LENGTH 33
-// 123456789012345678901234567890123
-// WHEEL CURRENT REPLY 01.234 12.345
-// WHEEL CURRENT REPLY %02d.%03d %02d.%03d
 
+byte rxBuf[255];
+char txBuf[64];
+int batteryVoltageReplyLength = 0;
+int wheelCurrentReplyLength = 0;
 // Note, when sending commands to Android I don't add the '\n'.
 // Turned out to be easier to just assume the whole message arrives together.
 // Seems to work fine.  Just separate into different write() commands.
@@ -161,8 +155,8 @@ void wheelCurrentRequestFromAndroid(void) {
 void batteryVoltageReplyFromThumper(int batteryMillivolts) {
   // Send to Android from within the main event loop.
   mainEventFlags |= FLAG_NEED_TO_SEND_BATTERY_VOLTAGE;
-  sprintf((char *) txBuf, "BATTERY VOLTAGE REPLY %d.%03d", batteryMillivolts / 1000, batteryMillivolts % 1000);  
-  
+  batteryVoltageReplyLength = robotAsciiCom.prepareBatteryVoltageReply(
+      batteryMillivolts, txBuf, sizeof(txBuf));
   // Display battery voltage on LCD.
   lcd.clear();
   lcd.print("Battery voltage:");
@@ -181,10 +175,9 @@ void batteryVoltageReplyFromThumper(int batteryMillivolts) {
 void wheelCurrentReplyFromThumper(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps) {
   // Send to Android from within the main event loop.
   mainEventFlags |= FLAG_NEED_TO_SEND_WHEEL_CURRENT;
-  sprintf((char *) txBuf, "WHEEL CURRENT REPLY %02d.%03d %02d.%03d",
-      leftWheelMotorsMilliamps / 1000, leftWheelMotorsMilliamps % 1000,
-      rightWheelMotorsMilliamps / 1000, rightWheelMotorsMilliamps % 1000);  
-  
+  wheelCurrentReplyLength = robotAsciiCom.prepareWheelCurrentReply(
+      leftWheelMotorsMilliamps, rightWheelMotorsMilliamps, txBuf, sizeof(txBuf));
+
   // Display wheel currents on LCD.
   lcd.clear();
   lcd.print("Wheel current:");
@@ -242,11 +235,11 @@ void loop() {
     // Passing commands from the Wild Thumper on up to Android.
     if (mainEventFlags & FLAG_NEED_TO_SEND_BATTERY_VOLTAGE) {
       mainEventFlags &= ~FLAG_NEED_TO_SEND_BATTERY_VOLTAGE;
-      acc.write(txBuf, BATTERY_VOLTAGE_REPLY_LENGTH);
+      acc.write(txBuf, batteryVoltageReplyLength);
     }
     if (mainEventFlags & FLAG_NEED_TO_SEND_WHEEL_CURRENT) {
       mainEventFlags &= ~FLAG_NEED_TO_SEND_WHEEL_CURRENT;
-      acc.write(txBuf, WHEEL_CURRENT_REPLY_LENGTH);
+      acc.write(txBuf, wheelCurrentReplyLength);
     }
   }
   

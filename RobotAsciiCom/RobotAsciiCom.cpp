@@ -72,6 +72,39 @@ void RobotAsciiCom::registerWheelSpeedCallback(
 	_wheelSpeedCallback = wheelSpeedCallback;
 }
 
+
+int RobotAsciiCom::prepareBatteryVoltageReply(int batteryMillivolts, char buf[], int maxLength) {
+	int batteryVoltageReplyLength = 27;
+	// 123456789012345678901234567
+	// BATTERY VOLTAGE REPLY 1.234
+	// BATTERY VOLTAGE REPLY %d.%03d"
+	if (maxLength < batteryVoltageReplyLength) {
+		return -1;
+	}
+	sprintf(buf, "BATTERY VOLTAGE REPLY %d.%03d", batteryMillivolts / 1000, batteryMillivolts % 1000);
+	if (batteryMillivolts / 1000 > 10) {
+		batteryVoltageReplyLength++;
+	}
+	return batteryVoltageReplyLength;
+}
+
+int RobotAsciiCom::prepareWheelCurrentReply(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps, char buf[], int maxLength) {
+	int wheelCurrentReplyLength = 31;
+	// 1234567890123456789012345678901
+	// WHEEL CURRENT REPLY 1.234 2.345
+	// WHEEL CURRENT REPLY %d.%03d %d.%03d
+	sprintf(buf, "WHEEL CURRENT REPLY %d.%03d %d.%03d",
+	      leftWheelMotorsMilliamps / 1000, leftWheelMotorsMilliamps % 1000,
+	      rightWheelMotorsMilliamps / 1000, rightWheelMotorsMilliamps % 1000);
+	if (leftWheelMotorsMilliamps / 1000  > 10) {
+		wheelCurrentReplyLength++;
+	}
+	if (rightWheelMotorsMilliamps / 1000  > 10) {
+		wheelCurrentReplyLength++;
+	}
+	return wheelCurrentReplyLength;
+}
+
 /**
  * Process the complete message.
  * CONSIDER: This function is too big.  
