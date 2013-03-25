@@ -43,8 +43,8 @@ unsigned long lastLeftMotorCurrentOverloadTime_ms = 0;
 unsigned long lastRightMotorCurrentOverloadTime_ms = 0;
 int leftMotorMode = BRAKE;                                           // 0=reverse, 1=brake, 2=forward
 int rightMotorMode = BRAKE;                                          // 0=reverse, 1=brake, 2=forward
-int leftMotorDutyCycle;                                              // PWM value for left  motor speed / brake
-int rightMotorDutyCycle;                                             // PWM value for right motor speed / brake
+int leftMotorDutyCycle = 0;                                          // PWM value for left  motor speed / brake
+int rightMotorDutyCycle = 0;                                         // PWM value for right motor speed / brake
 
 void setup() {
   // Make sure the charger is always off (not useful and dangerous for our LiPo batteries)
