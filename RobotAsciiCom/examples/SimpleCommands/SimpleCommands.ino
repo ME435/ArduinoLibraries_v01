@@ -8,6 +8,7 @@ RobotAsciiCom robotCom;
 void setup() {
   Serial.begin(9600);
   delay(100);
+  armServos.attach();
   robotCom.registerPositionCallback(positionCallback);
   robotCom.registerJointAngleCallback(jointAngleCallback);
   robotCom.registerGripperCallback(gripperCallback);
