@@ -195,15 +195,11 @@ byte MAX3421E::gpioRd( void )
 /* reset MAX3421E using chip reset bit. SPI configuration is not affected   */
 boolean MAX3421E::reset()
 {
-  byte tmp = 0;
-    regWr( rUSBCTL, bmCHIPRES );                        //Chip reset. This stops the oscillator
+  // Changed to never stop trying on 3/28/2013 by DSF
+	// http://stackoverflow.com/questions/11213536/error-oscokirq-failed-to-assert/11239701#11239701
+    regWr( rUSBCTL, bmCHIPRES );                        //Chip reset. This stops the   oscillator
     regWr( rUSBCTL, 0x00 );                             //Remove the reset
-    while(!(regRd( rUSBIRQ ) & bmOSCOKIRQ )) {          //wait until the PLL is stable
-        tmp++;                                          //timeout after 256 attempts
-        if( tmp == 0 ) {
-            return( false );
-        }
-    }
+    while(!(regRd(rUSBIRQ) & bmOSCOKIRQ)) ;
     return( true );
 }
 /* turn USB power on/off                                                */
