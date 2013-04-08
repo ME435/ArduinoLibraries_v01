@@ -1,3 +1,7 @@
+/**
+ * This code runs on the ADK board to send signals to the Wild Thumper controller.
+ */
+
 #include <WildThumperCom.h>
 
 #define REVERSE 0

@@ -5,11 +5,11 @@
 
 /**
  * This program is an example of the code that would run on the Wild Thumper Controller.
- * This program uses the Wireless Thumper communication protocol.  It controls
+ * This program uses the WildThumperCom protocol.  It controls
  * only the wheels using serial communication.  Designed for use with an XBee.
  */
 
-// To connect an XBee use the three pins on the D0 header.
+// To connect an XBee use the three pins on the D0 header row.
 // Ground is on the outside, 5v power in the middle, Thumper Rx on inside.
 // The Tx line for the Thumper is on D1 inside, but not needed for this program.
 
@@ -68,7 +68,7 @@ void loop() {
   int batteryVoltageAnalogReading = analogRead(PIN_BATTERY);      // read the battery voltage
   int leftCurrentAnalogReading = analogRead(PIN_LEFT_MOTOR_CURRENT);     // read left motor current draw
   int rightCurrentAnalogReading = analogRead(PIN_RIGHT_MOTOR_CURRENT);   // read right motor current draw
-  int batteryInMillivolts = batteryVoltageAnalogReading * 14 + batteryVoltageAnalogReading / 2;      // 14.66 is the real value 14.5 is close enough
+  int batteryInMillivolts = batteryVoltageAnalogReading * 15 - batteryVoltageAnalogReading / 3; // 5 / 1023 * 3 * 1000
   int leftCurrentInMilliamps = leftCurrentAnalogReading * 20;     // left motor current draw in milliamps
   int rightCurrentInMilliamps = rightCurrentAnalogReading * 20;   // right motor current draw in milliamps
   

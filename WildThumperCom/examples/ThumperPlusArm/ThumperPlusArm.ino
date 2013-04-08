@@ -105,7 +105,7 @@ void loop() {
   armServos.updateServos();
   //--------------------- Check battery voltage and current draw of motors ---------------------
   int batteryVoltageAnalogReading = analogRead(PIN_BATTERY);      // read the battery voltage
-  batteryInMillivolts = batteryVoltageAnalogReading * 14 + batteryVoltageAnalogReading / 2;      // 14.66 is the real value 14.5 is close enough
+  batteryInMillivolts = batteryVoltageAnalogReading * 15 - batteryVoltageAnalogReading / 3; // 5 / 1023 * 3 * 1000
   if (mainEventFlags & FLAG_SEND_BATTERY_VOLTAGE) {
     mainEventFlags &= ~FLAG_SEND_BATTERY_VOLTAGE;
     wtc.sendBatteryVoltageReply(batteryInMillivolts);
