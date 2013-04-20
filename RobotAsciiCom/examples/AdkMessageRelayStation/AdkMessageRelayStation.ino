@@ -5,7 +5,7 @@
 #include <RobotAsciiCom.h>
 #include <WildThumperCom.h>
 
-#define TEAM_NUMBER 48  // Replace this with your team number.
+#define TEAM_NUMBER 4  // Replace this with your team number.
 
 char manufacturer[] = "Rose-Hulman";
 char model[] = "My Android app name";
@@ -29,18 +29,25 @@ int wheelCurrentReplyLength = 0;
 
 // Just a random set of scripts that you might make for testing.
 char ballPresentScript[] = "ball_present";
-char placeBallPortScript[] = "place_ball_port";
-char placeBallCenterScript[] = "place_center_port";
-char placeBallStarboardScript[] = "place_starboard_port";
-char portBallPickupScript[] = "port_ball_pickup";
-char centerBallPickupScript[] = "center_ball_pickup";
-char starboardBallSPickupcript[] = "starboard_ball_pickup";
-char redScript[] = "red";
-char whiteScript[] = "white";
-char blueScript[] = "blue";
-char yellowScript[] = "yellow";
-char greenScript[] = "green";
-char blackScript[] = "black";
+char placeBallOn1Script[] = "place_ball_on_1";
+char placeBallOn2Script[] = "place_ball_on_2";
+char placeBallOn3Script[] = "place_ball_on_3";
+char pickupBallFrom1Script[] = "pickup_ball_from_1";
+char pickupBallFrom2Script[] = "pickup_ball_from_2";
+char pickupBallFrom3Script[] = "pickup_ball_from_3";
+char dropoffRedBallScript[] = "dropoff_red";
+char dropoffWhiteBallScript[] = "dropoff_white";
+char dropoffBlueBallScript[] = "dropoff_blue";
+char dropoffYellowBallScript[] = "dropoff_yellow";
+char dropoffGreenBallScript[] = "dropoff_green";
+char dropoffBlackBallScript[] = "dropoff_black";
+char dropoffNonblackBallScript[] = "dropoff_nonblack";
+char black1Script[] = "black_1";
+char nonblack1Script[] = "nonblack_1";
+char black2Script[] = "black_2";
+char nonblack2Script[] = "nonblack_2";
+char black3Script[] = "black_3";
+char nonblack3Script[] = "nonblack_3";
 
 /***  Pin I/O   ***/ 
 #define PIN_RIGHT_BUTTON 2
@@ -215,21 +222,21 @@ void loop() {
       delay(20);
       mainEventFlags &= ~FLAG_INTERRUPT_0;
       if (!digitalRead(PIN_RIGHT_BUTTON)) {
-        acc.write(ballPresentScript, sizeof(ballPresentScript));
+        acc.write(black2Script, sizeof(black2Script));
       }
     }
     if (mainEventFlags & FLAG_INTERRUPT_1) {
       delay(20);
       mainEventFlags &= ~FLAG_INTERRUPT_1;
       if (!digitalRead(PIN_LEFT_BUTTON)) {
-        acc.write(placeBallCenterScript, sizeof(placeBallCenterScript));
+        acc.write(nonblack2Script, sizeof(nonblack2Script));
       }
     }
     if (mainEventFlags & FLAG_INTERRUPT_2) {
       delay(20);
       mainEventFlags &= ~FLAG_INTERRUPT_2;
       if (!digitalRead(PIN_SELECT_BUTTON)) {
-        acc.write(centerBallPickupScript, sizeof(centerBallPickupScript));
+        acc.write(placeBallOn2Script, sizeof(placeBallOn2Script));
       }
     }
     // Passing commands from the Wild Thumper on up to Android.

@@ -16,7 +16,7 @@
 #define LINE_2 1
 
 TimerEventScheduler tes;
-// Create a timer event that is initially disables (call in 0 ms = never)
+// Create timer events that are initially disabled (call in 0 ms = never)
 TimerEvent leftButtonDebounceTimerEvent(leftButtonDebounceCallback, 0);
 TimerEvent rightButtonDebounceTimerEvent(rightButtonDebounceCallback, 0);
 
@@ -50,17 +50,17 @@ int leftButtonDebounceCallback() {
   if (!digitalRead(PIN_LEFT_BUTTON)) {
     age--;
   }
-  return 0;  // Don't call this Timer Event again automatically 0 is off.
+  return 0;  // Don't call this Timer Event again (0 is off).
 }
 
 int rightButtonDebounceCallback() {
   if (!digitalRead(PIN_RIGHT_BUTTON)) {
     age++;
   }
-  return 0; // Don't call this Timer Event again automatically 0 is off.
+  return 0; // Don't call this Timer Event again (0 is off).
 }
 
-// the loop routine runs over and over again forever:
+// The loop routine runs over and over again forever:
 void loop() {
   if (age != ageLastWrite) {
     lcd.setCursor(1, LINE_2);

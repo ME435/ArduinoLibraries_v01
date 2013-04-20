@@ -4,20 +4,11 @@
 //
 
 /**
- * This program is an example of the code that would run on the Wild Thumper Controller.
- * This program uses the Wireless Thumper communication protocol.
+ * This program is used to do the wheel current calibration test.
+ * It is a striped down version of the standard Thumper program.
+ * Instead of using communication it is full forward always.
  */
 
-// To connect serial communication lines.
-// D0 - Ground is on the outside, 5v power in the middle, Thumper Rx on inside.
-// D1 - Ground is on the outside, 5v power in the middle, Thumper Tx on inside.
-
-#include <WildThumperCom.h>
-#include <Servo.h>
-#include <ArmServos.h>
-#include <ArmServosSpeedControlled.h>
-
-#define TEAM_NUMBER 4  // Change as appropriate for your team
 
 // ==================== IO Pins =========================
 #define PIN_LEFT_MOTOR_CH_A        3  // Left  motor H bridge, input A
@@ -36,96 +27,69 @@
 #define BRAKE   1  // Mode to stop
 #define FORWARD 2  // Mode to go forward
 #define BATTERY_SHUTDOWN_MILLIVOLTS     6400     // This is the millivolt reading at which the battery is too low to continue. (6.4 volts)
-#define MOTOR_SHUTDOWN_MILLIAMPS        11000     // overload current limit for motor (help reduce the risk of stalled motors drawing too much current) (9 amps)
+#define MOTOR_SHUTDOWN_MILLIAMPS        9000     // overload current limit for motor (help reduce the risk of stalled motors drawing too much current) (9 amps)
 #define COOLDOWN_TIME        100     // time in mS before motor is re-enabled after overload occurs
 
 
-WildThumperCom wtc(TEAM_NUMBER);
 unsigned long lastLeftMotorCurrentOverloadTime_ms = 0;
 unsigned long lastRightMotorCurrentOverloadTime_ms = 0;
 int leftMotorMode = BRAKE;                                           // 0=reverse, 1=brake, 2=forward
 int rightMotorMode = BRAKE;                                          // 0=reverse, 1=brake, 2=forward
-int leftMotorDutyCycle;                                              // PWM value for left  motor speed / brake
-int rightMotorDutyCycle;                                             // PWM value for right motor speed / brake
-int batteryInMillivolts;       // Battery voltage in millivolts.
-int leftCurrentInMilliamps;    // Left motor current draw in milliamps.
-int rightCurrentInMilliamps;   // Right motor current draw in milliamps.
+int leftMotorDutyCycle = 0;                                          // PWM value for left  motor speed / brake
+int rightMotorDutyCycle = 0;                                         // PWM value for right motor speed / brake
 
-ArmServosSpeedControlled armServos(4, 7, 8, 9, 10, 12);
-
-/*** Interrupt flags ***/
-volatile int mainEventFlags = 0;
-#define FLAG_SEND_BATTERY_VOLTAGE 0x01
-#define FLAG_SEND_WHEEL_CURRENT   0x02
+// Define how often the messages are sent to the serial monitor.
+#define PRINT_TIME_DELAY_MS 2000
+unsigned long lastPrintTime = PRINT_TIME_DELAY_MS - 100;  // Added for calibration debugging.
 
 void setup() {
   // Make sure the charger is always off (not useful and dangerous for our LiPo batteries)
   pinMode (PIN_CHARGER, OUTPUT);
   digitalWrite (PIN_CHARGER, CHARGER_OFF);
 
-  Serial.begin(115200);
-  wtc.registerWheelSpeedCallback(wheelSpeedCallback);
-  wtc.registerPositionCallback(positionCallback);
-  wtc.registerJointAngleCallback(jointAngleCallback);
-  wtc.registerGripperCallback(gripperCallback);
-  wtc.registerBatteryVoltageRequestCallback(batteryVoltageRequestCallback);
-  wtc.registerWheelCurrentRequestCallback(wheelCurrentRequestCallback);
-  armServos.attach();
+  Serial.begin(9600);  // Default speed used by our XBee boards
+  updateWheelSpeed(FORWARD, FORWARD, 255, 255);
 }
 
 /** Update the wheel speed variables based on the new values received. */
-void wheelSpeedCallback(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) {
+void updateWheelSpeed(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) {
   leftMotorMode = leftMode;
   leftMotorDutyCycle = leftDutyCycle;
   rightMotorMode = rightMode;
   rightMotorDutyCycle = rightDutyCycle; 
 }
 
-void positionCallback(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
-  armServos.setPosition(joint1Angle, joint2Angle, joint3Angle, joint4Angle, joint5Angle);
-}
-
-void jointAngleCallback(byte jointNumber, int jointAngle) {
-  armServos.setJointAngle(jointNumber, jointAngle);
-}
-
-void gripperCallback(int gripperDistance) {
-  armServos.setGripperDistance(gripperDistance);
-}
-
-void batteryVoltageRequestCallback() {
-  mainEventFlags |= FLAG_SEND_BATTERY_VOLTAGE;
-}
-
-void wheelCurrentRequestCallback() {
-  mainEventFlags |= FLAG_SEND_WHEEL_CURRENT;
-}
-
-
 void loop() {
-  armServos.updateServos();
   //--------------------- Check battery voltage and current draw of motors ---------------------
   int batteryVoltageAnalogReading = analogRead(PIN_BATTERY);      // read the battery voltage
-  batteryInMillivolts = batteryVoltageAnalogReading * 15 - batteryVoltageAnalogReading / 3; // 5 / 1023 * 3 * 1000
-  if (mainEventFlags & FLAG_SEND_BATTERY_VOLTAGE) {
-    mainEventFlags &= ~FLAG_SEND_BATTERY_VOLTAGE;
-    wtc.sendBatteryVoltageReply(batteryInMillivolts);
-  }  
   int leftCurrentAnalogReading = analogRead(PIN_LEFT_MOTOR_CURRENT);     // read left motor current draw
   int rightCurrentAnalogReading = analogRead(PIN_RIGHT_MOTOR_CURRENT);   // read right motor current draw
-  leftCurrentInMilliamps = leftCurrentAnalogReading * 20;     // left motor current draw in milliamps
-  rightCurrentInMilliamps = rightCurrentAnalogReading * 20;   // right motor current draw in milliamps
-  if (mainEventFlags & FLAG_SEND_WHEEL_CURRENT) {
-    mainEventFlags &= ~FLAG_SEND_WHEEL_CURRENT;
-    wtc.sendWheelCurrentReply(leftCurrentInMilliamps, rightCurrentInMilliamps);
+  int batteryInMillivolts = batteryVoltageAnalogReading * 15 - batteryVoltageAnalogReading / 3; // 5 / 1023 * 3 * 1000
+  int leftCurrentInMilliamps = leftCurrentAnalogReading * 20;     // left motor current draw in milliamps
+  int rightCurrentInMilliamps = rightCurrentAnalogReading * 20;   // right motor current draw in milliamps
+
+  if (millis() - lastPrintTime > PRINT_TIME_DELAY_MS) { 
+    Serial.println();
+    Serial.print("batt = ");
+    Serial.print(batteryInMillivolts); 
+    Serial.print("mV  left = ");
+    Serial.print(leftCurrentInMilliamps);
+    Serial.print("mA  right = ");
+    Serial.print(rightCurrentInMilliamps);
+    Serial.print("mA");
+    lastPrintTime = millis();
   }
-  
+
   if (batteryInMillivolts < BATTERY_SHUTDOWN_MILLIVOLTS) {      
+      Serial.println();
+      Serial.print("Low Battery = ");
+      Serial.print(batteryInMillivolts); 
+      Serial.print("mV");
       // Shut down the Wild Thumper if the battery voltage is too low (or spin in a circle or something).
       if ((millis() / 1000) % 2) {      
-        wheelSpeedCallback(FORWARD, FORWARD, 20, 20);
+        updateWheelSpeed(FORWARD, FORWARD, 20, 20);
       } else {
-        wheelSpeedCallback(BRAKE, BRAKE, 0, 0);
+        updateWheelSpeed(BRAKE, BRAKE, 0, 0);
       }
   }
   
@@ -134,6 +98,7 @@ void loop() {
     analogWrite(PIN_LEFT_MOTOR_CH_A, 0);                            // turn off motors
     analogWrite(PIN_LEFT_MOTOR_CH_B, 0);                            // turn off motors
     lastLeftMotorCurrentOverloadTime_ms = millis();                 // record time of overload
+    Serial.print("L");
   }
 
   if (rightCurrentInMilliamps > MOTOR_SHUTDOWN_MILLIAMPS)                          // is motor current draw exceeding safe limit
@@ -141,7 +106,8 @@ void loop() {
     analogWrite(PIN_RIGHT_MOTOR_CH_A, 0);                            // turn off motors
     analogWrite(PIN_RIGHT_MOTOR_CH_B, 0);                            // turn off motors
     lastRightMotorCurrentOverloadTime_ms = millis();                   // record time of overload
-  }
+    Serial.print("R");
+  }    
   
   //--------------------- Set the motor speeds (if not in a stalled motor state) ---------------------
   if ((millis()-lastLeftMotorCurrentOverloadTime_ms) > COOLDOWN_TIME)             
@@ -179,12 +145,5 @@ void loop() {
         analogWrite(PIN_RIGHT_MOTOR_CH_B, 0);
         break;
     }
-  }
-}
-
-/** Send all bytes received to the Wild Thumper Com object. */
-void serialEvent() {
-  while (Serial.available()) {
-    wtc.handleRxByte(Serial.read());
   }
 }
