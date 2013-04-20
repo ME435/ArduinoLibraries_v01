@@ -29,7 +29,7 @@ void startPlayback() {
     lastScriptTimeUsed = scriptTime;
     playbackTimerEvent.setTimerTicksRemaining((int) scriptTime);
   }
-  lcd.setCursor(4, LINE_2);
+  lcd.setCursor(6, LINE_2);
   lcd.print(playbackCounter);
   lcd.print("/");
   lcd.print(playbackLength);

@@ -12,7 +12,7 @@ void printRecording() {
   int eepromAddress = 2;
   temporaryVariableForScriptLength = getScriptLengthFromEeprom();
   for (int i = 0; i <= temporaryVariableForScriptLength; i++) {
-    int eventTime = getScriptTimeAtAddress(eepromAddress);
+    unsigned long eventTime = getScriptTimeAtAddress(eepromAddress);
     eepromAddress += 4;
     byte leftMode = EEPROM.read(eepromAddress);
     eepromAddress++;
