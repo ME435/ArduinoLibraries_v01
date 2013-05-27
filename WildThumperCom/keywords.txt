@@ -1,4 +1,6 @@
 WildThumperCom	KEYWORD1
+getTeamNumber	KEYWORD2
+setTeamNumber	KEYWORD2
 sendWheelSpeed	KEYWORD2
 sendPosition	KEYWORD2
 sendJointAngle	KEYWORD2
@@ -7,6 +9,10 @@ sendBatteryVoltageRequest	KEYWORD2
 sendBatteryVoltageReply		KEYWORD2
 sendWheelCurrentRequest		KEYWORD2
 sendWheelCurrentReply		KEYWORD2
+sendTeamNumberRequest		KEYWORD2
+sendTeamNumberReply			KEYWORD2
+sendTeamNumberChangeRequest		KEYWORD2
+sendAttachServos			KEYWORD2
 registerWheelSpeedCallback	KEYWORD2
 registerPositionCallback	KEYWORD2
 registerJointAngleCallback	KEYWORD2
@@ -15,5 +21,9 @@ registerBatteryVoltageRequestCallback	KEYWORD2
 registerBatteryVoltageReplyCallback		KEYWORD2
 registerWheelCurrentRequestCallback		KEYWORD2
 registerWheelCurrentReplyCallback		KEYWORD2
+registerTeamNumberRequestCallback		KEYWORD2
+registerTeamNumberReplyCallback			KEYWORD2
+registerTeamNumberChangeRequestCallback		KEYWORD2
+registerAttachServosCallback			KEYWORD2
 handleRxByte	KEYWORD2
 

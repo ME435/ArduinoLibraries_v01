@@ -21,12 +21,21 @@
 #define NUM_SERVOS 6
 #define GRIPPER_SERVO_INDEX 0
 
+// When attaching select servos use these constants.
+#define SERVO_GRIPPER 	0x01
+#define SERVO_JOINT_1   0x02
+#define SERVO_JOINT_2 	0x04
+#define SERVO_JOINT_3 	0x08
+#define SERVO_JOINT_4 	0x10
+#define SERVO_JOINT_5 	0x20
+
 class ArmServos
 {
   public:
     ArmServos();
     ArmServos(byte joint1ServoPin, byte joint2ServoPin, byte joint3ServoPin, byte joint4ServoPin, byte joint5ServoPin, byte gripperServoPin);
     void attach();
+    void attachSelectedServos(byte servosToEnable);
     void setJointAngle(byte jointNumber, int angle);
     int getJointAngle(byte jointNumber);
     void setGripperDistance(int distance);

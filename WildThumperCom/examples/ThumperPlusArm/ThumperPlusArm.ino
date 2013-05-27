@@ -63,7 +63,7 @@ void setup() {
   pinMode (PIN_CHARGER, OUTPUT);
   digitalWrite (PIN_CHARGER, CHARGER_OFF);
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   wtc.registerWheelSpeedCallback(wheelSpeedCallback);
   wtc.registerPositionCallback(positionCallback);
   wtc.registerJointAngleCallback(jointAngleCallback);

@@ -11,9 +11,17 @@ WildThumperCom::WildThumperCom(byte teamNumber) {
 	_batteryVoltageReplyCallback = NULL;
 	_wheelCurrentRequestCallback = NULL;
 	_wheelCurrentReplyCallback = NULL;
+    _teamNumberRequestCallback = NULL;
+    _teamNumberReplyCallback = NULL;
+    _teamNumberChangeRequestCallback = NULL;
+    _attachServosCallback = NULL;
 	_lastByteWasStartByte = false;
 	_lastByteWasEscapeByte = false;
 	_bytesRemainingInMessage = -1;
+}
+
+void WildThumperCom::setTeamNumber(byte teamNumber) {
+	_teamNumber = teamNumber;
 }
 
 void WildThumperCom::sendWheelSpeed(byte leftMode, byte rightMode,
@@ -97,6 +105,33 @@ void WildThumperCom::sendWheelCurrentReply(int leftWheelMotorsMilliamps,
 	_sendMessage (WHEEL_CURRENT_REPLY_LENGTH);
 }
 
+void WildThumperCom::sendTeamNumberRequest() {
+	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
+	_txMessageBuffer[COMMAND_BYTE] = COMMAND_TEAM_NUMBER_REQUEST;
+	_sendMessage (TEAM_NUMBER_REQUEST_REQUEST_LENGTH);
+}
+
+void WildThumperCom::sendTeamNumberReply(byte teamNumber) {
+	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
+	_txMessageBuffer[COMMAND_BYTE] = COMMAND_TEAM_NUMBER_REPLY;
+	_txMessageBuffer[TEAM_NUMBER_REPLY_TEAM_NUMBER] = teamNumber;
+	_sendMessage (TEAM_NUMBER_REPLY_LENGTH);
+}
+
+void WildThumperCom::sendTeamNumberChangeRequest(byte teamNumber) {
+	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
+	_txMessageBuffer[COMMAND_BYTE] = COMMAND_TEAM_NUMBER_CHANGE_REQUEST;
+	_txMessageBuffer[TEAM_NUMBER_CHANGE_REQUEST_NEW_TEAM_NUMBER] = teamNumber;
+	_sendMessage (TEAM_NUMBER_CHANGE_REQUEST_LENGTH);
+}
+
+void WildThumperCom::sendAttachServos(byte servosToEnable) {
+	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
+	_txMessageBuffer[COMMAND_BYTE] = COMMAND_TEAM_NUMBER_CHANGE_REQUEST;
+	_txMessageBuffer[ATTACH_SERVOS_ENABLE_BYTE] = servosToEnable;
+	_sendMessage (ATTACH_SERVOS_LENGTH);
+}
+
 void WildThumperCom::_sendMessage(byte messageLength) {
 	byte crc = 0;
 	Serial.write(START_BYTE);
@@ -160,6 +195,23 @@ void WildThumperCom::registerWheelCurrentReplyCallback(
 	_wheelCurrentReplyCallback = wheelCurrentReplyCallback;
 }
 
+void WildThumperCom::registerTeamNumberRequestCallback(void (* teamNumberRequestCallback)(void) ) {
+	_teamNumberRequestCallback = teamNumberRequestCallback;
+}
+
+void WildThumperCom::registerTeamNumberReplyCallback(void (* teamNumberReplyCallback)(byte teamNumber) ) {
+	_teamNumberReplyCallback = teamNumberReplyCallback;
+}
+
+void WildThumperCom::registerTeamNumberChangeRequestCallback(void (* teamNumberChangeRequestCallback)(byte teamNumber) ) {
+	_teamNumberChangeRequestCallback = teamNumberChangeRequestCallback;
+}
+
+void WildThumperCom::registerAttachServosCallback(void (* attachServosCallback)(byte servosToEnable) ) {
+	_attachServosCallback = attachServosCallback;
+}
+
+
 void WildThumperCom::handleRxByte(byte newRxByte) {
 	// Highest priority is the start byte.
 	if (newRxByte == START_BYTE) {
@@ -208,7 +260,10 @@ void WildThumperCom::handleRxByte(byte newRxByte) {
 
 void WildThumperCom::_parseValidMessage() {
 	byte teamNumber = _rxMessageBuffer[TEAM_NUMBER_BYTE];
-	if (teamNumber != _teamNumber) {
+	if (teamNumber != _teamNumber
+		&& !(_rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_REQUEST ||
+			 _rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_REPLY ||
+			 _rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_CHANGE_REQUEST)) {
 		// Silently do nothing if it's not our team.
 		return;
 	}
@@ -272,6 +327,46 @@ void WildThumperCom::_parseValidMessage() {
 			batteryVoltageMillivolts +=
 					_rxMessageBuffer[BATTERY_VOLTAGE_REPLY_LSB];
 			_batteryVoltageReplyCallback(batteryVoltageMillivolts);
+		}
+		break;
+	case COMMAND_WHEEL_CURRENT_REQUEST:
+		if (_wheelCurrentRequestCallback != NULL) {
+			_wheelCurrentRequestCallback();
+		}
+		break;
+	case COMMAND_WHEEL_CURRENT_REPLY:
+		if (_wheelCurrentReplyCallback != NULL) {
+			int leftWheelMotorsMilliamps =
+					_rxMessageBuffer[WHEEL_CURRENT_REPLY_LEFT_MSB];
+			leftWheelMotorsMilliamps = leftWheelMotorsMilliamps << 8;
+			leftWheelMotorsMilliamps += 
+					_rxMessageBuffer[WHEEL_CURRENT_REPLY_LEFT_LSB];
+			int rightWheelMotorsMilliamps =
+					_rxMessageBuffer[WHEEL_CURRENT_REPLY_RIGHT_MSB];
+			rightWheelMotorsMilliamps = rightWheelMotorsMilliamps << 8;
+			rightWheelMotorsMilliamps += 
+					_rxMessageBuffer[WHEEL_CURRENT_REPLY_RIGHT_LSB];
+			_wheelCurrentReplyCallback(leftWheelMotorsMilliamps, rightWheelMotorsMilliamps);
+		}
+		break;
+	case COMMAND_TEAM_NUMBER_REQUEST:
+		if (_teamNumberRequestCallback != NULL) {
+			_teamNumberRequestCallback();
+		}
+		break;
+	case COMMAND_TEAM_NUMBER_REPLY:
+		if (_teamNumberReplyCallback != NULL) {
+			_teamNumberReplyCallback(_rxMessageBuffer[TEAM_NUMBER_REPLY_TEAM_NUMBER]);
+		}
+		break;
+	case COMMAND_TEAM_NUMBER_CHANGE_REQUEST:
+		if (_teamNumberChangeRequestCallback != NULL) {
+			_teamNumberChangeRequestCallback(_rxMessageBuffer[TEAM_NUMBER_CHANGE_REQUEST_NEW_TEAM_NUMBER]);
+		}
+		break;
+	case COMMAND_ATTACH_SERVOS:
+		if (_attachServosCallback != NULL) {
+			_attachServosCallback(_rxMessageBuffer[ATTACH_SERVOS_ENABLE_BYTE]);
 		}
 		break;
 	default:
