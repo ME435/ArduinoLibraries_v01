@@ -25,7 +25,7 @@
 #define COMMAND_TEAM_NUMBER_REQUEST    	 9
 #define COMMAND_TEAM_NUMBER_REPLY       10
 #define COMMAND_TEAM_NUMBER_CHANGE_REQUEST	11
-#define COMMAND_ATTACH_SERVOS   	 	12
+#define COMMAND_ATTACH_SELECTED_SERVOS   12
 
 // Bytes within commands
 #define WHEEL_SPEED_MESSAGE_LENGTH		6
@@ -88,9 +88,9 @@
 // TEAM_NUMBER_BYTE is 0, COMMAND_BYTE is 1
 #define TEAM_NUMBER_CHANGE_REQUEST_NEW_TEAM_NUMBER 	2
 
-#define ATTACH_SERVOS_LENGTH 			3
+#define ATTACH_SELECTED_SERVOS_LENGTH 			3
 // TEAM_NUMBER_BYTE is 0, COMMAND_BYTE is 1
-#define ATTACH_SERVOS_ENABLE_BYTE 		2
+#define ATTACH_SELECTED_SERVOS_ENABLE_BYTE 		2
 
 // Constants used in the wheel speed commands.
 // Used for legacy reasons to match the original Thumper code.
@@ -115,7 +115,7 @@ class WildThumperCom
 	void sendTeamNumberRequest();
 	void sendTeamNumberReply(byte teamNumber);
 	void sendTeamNumberChangeRequest(byte teamNumber);
-	void sendAttachServos(byte servosToEnable);
+	void sendAttachSelectedServos(byte servosToEnable);
 	void registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) );
     void registerPositionCallback(void (* positionCallback)(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) );
     void registerJointAngleCallback(void (* jointAngleCallback)(byte jointNumber, int jointAngle) );
@@ -127,7 +127,7 @@ class WildThumperCom
     void registerTeamNumberRequestCallback(void (* teamNumberRequestCallback)(void) );
     void registerTeamNumberReplyCallback(void (* teamNumberReplyCallback)(byte teamNumber) );
     void registerTeamNumberChangeRequestCallback(void (* teamNumberChangeRequestCallback)(byte teamNumber) );
-    void registerAttachServosCallback(void (* attachServosCallback)(byte servosToEnable) );
+    void registerAttachSelectedServosCallback(void (* attachSelectedServosCallback)(byte servosToEnable) );
     void handleRxByte(byte newRxByte);
   private:
 	byte _teamNumber;
@@ -146,7 +146,7 @@ class WildThumperCom
     void (* _teamNumberRequestCallback)(void);
     void (* _teamNumberReplyCallback)(byte teamNumber);
     void (* _teamNumberChangeRequestCallback)(byte teamNumber);
-    void (* _attachServosCallback)(byte servosToEnable);
+    void (* _attachSelectedServosCallback)(byte servosToEnable);
 	boolean _lastByteWasStartByte;
 	boolean _lastByteWasEscapeByte;
 	int _bytesRemainingInMessage;

@@ -12,7 +12,7 @@ sendWheelCurrentReply		KEYWORD2
 sendTeamNumberRequest		KEYWORD2
 sendTeamNumberReply			KEYWORD2
 sendTeamNumberChangeRequest		KEYWORD2
-sendAttachServos			KEYWORD2
+sendAttachSelectedServos	KEYWORD2
 registerWheelSpeedCallback	KEYWORD2
 registerPositionCallback	KEYWORD2
 registerJointAngleCallback	KEYWORD2
@@ -24,6 +24,6 @@ registerWheelCurrentReplyCallback		KEYWORD2
 registerTeamNumberRequestCallback		KEYWORD2
 registerTeamNumberReplyCallback			KEYWORD2
 registerTeamNumberChangeRequestCallback		KEYWORD2
-registerAttachServosCallback			KEYWORD2
+registerAttachSelectedServosCallback	KEYWORD2
 handleRxByte	KEYWORD2
 

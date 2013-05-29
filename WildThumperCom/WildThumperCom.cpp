@@ -14,7 +14,7 @@ WildThumperCom::WildThumperCom(byte teamNumber) {
     _teamNumberRequestCallback = NULL;
     _teamNumberReplyCallback = NULL;
     _teamNumberChangeRequestCallback = NULL;
-    _attachServosCallback = NULL;
+    _attachSelectedServosCallback = NULL;
 	_lastByteWasStartByte = false;
 	_lastByteWasEscapeByte = false;
 	_bytesRemainingInMessage = -1;
@@ -125,11 +125,11 @@ void WildThumperCom::sendTeamNumberChangeRequest(byte teamNumber) {
 	_sendMessage (TEAM_NUMBER_CHANGE_REQUEST_LENGTH);
 }
 
-void WildThumperCom::sendAttachServos(byte servosToEnable) {
+void WildThumperCom::sendAttachSelectedServos(byte servosToEnable) {
 	_txMessageBuffer[TEAM_NUMBER_BYTE] = _teamNumber;
-	_txMessageBuffer[COMMAND_BYTE] = COMMAND_TEAM_NUMBER_CHANGE_REQUEST;
-	_txMessageBuffer[ATTACH_SERVOS_ENABLE_BYTE] = servosToEnable;
-	_sendMessage (ATTACH_SERVOS_LENGTH);
+	_txMessageBuffer[COMMAND_BYTE] = COMMAND_ATTACH_SELECTED_SERVOS;
+	_txMessageBuffer[ATTACH_SELECTED_SERVOS_ENABLE_BYTE] = servosToEnable;
+	_sendMessage (ATTACH_SELECTED_SERVOS_LENGTH);
 }
 
 void WildThumperCom::_sendMessage(byte messageLength) {
@@ -207,8 +207,8 @@ void WildThumperCom::registerTeamNumberChangeRequestCallback(void (* teamNumberC
 	_teamNumberChangeRequestCallback = teamNumberChangeRequestCallback;
 }
 
-void WildThumperCom::registerAttachServosCallback(void (* attachServosCallback)(byte servosToEnable) ) {
-	_attachServosCallback = attachServosCallback;
+void WildThumperCom::registerAttachSelectedServosCallback(void (* attachSelectedServosCallback)(byte servosToEnable) ) {
+	_attachSelectedServosCallback = attachSelectedServosCallback;
 }
 
 
@@ -364,9 +364,9 @@ void WildThumperCom::_parseValidMessage() {
 			_teamNumberChangeRequestCallback(_rxMessageBuffer[TEAM_NUMBER_CHANGE_REQUEST_NEW_TEAM_NUMBER]);
 		}
 		break;
-	case COMMAND_ATTACH_SERVOS:
-		if (_attachServosCallback != NULL) {
-			_attachServosCallback(_rxMessageBuffer[ATTACH_SERVOS_ENABLE_BYTE]);
+	case COMMAND_ATTACH_SELECTED_SERVOS:
+		if (_attachSelectedServosCallback != NULL) {
+			_attachSelectedServosCallback(_rxMessageBuffer[ATTACH_SELECTED_SERVOS_ENABLE_BYTE]);
 		}
 		break;
 	default:
