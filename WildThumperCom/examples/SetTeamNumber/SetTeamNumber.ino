@@ -4,6 +4,17 @@
  * by the ADK board.  This is primarially important when using XBee
  * for wireless communication, but the team number must match even
  * if you are wired directly (since it's in the code due to wireless).
+ *
+ * Instructions for using this program:
+ * Connect both Rx and Tx to the Wild Thumper and turn on battery power.
+ * The LCD screen on the ADK board should display the desired team number
+ * as well as the most recently received team number from Wild Thumper.
+ *   Analog joystick up and down to change the desired team number.
+ *   Right pushbutton - Request (without changing) the current team number.
+ *   Left pushbutton - Change the team number to the desired team number.
+ *      (note that the A1 row must have a jumper to change team number).
+ *   Joystick press (select button) - Clear the LCD value that displays the
+ *      most recent team number received (handy to make sure it's fresh data). 
  */
 
 #include <LiquidCrystal.h>
