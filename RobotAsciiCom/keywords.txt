@@ -16,9 +16,10 @@ registerGripperCallback	KEYWORD2
 registerBatteryVoltageRequestCallback	KEYWORD2    
 registerWheelCurrentRequestCallback	KEYWORD2    
 registerWheelSpeedCallback	KEYWORD2  
+registerCustomStringCallback KEYWORD2
 prepareBatteryVoltageReply KEYWORD2
 prepareWheelCurrentReply KEYWORD2
-	
+
 #######################################
 # Constants (LITERAL1)
 #######################################

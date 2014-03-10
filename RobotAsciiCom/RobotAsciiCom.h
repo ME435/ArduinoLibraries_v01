@@ -23,6 +23,7 @@ class RobotAsciiCom
     void registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void) );
     void registerWheelCurrentRequestCallback(void (* wheelCurrentRequestCallback)(void) );
 	void registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) );
+	void registerCustomStringCallback( void (* customStringCallback)(String customString) );	
 	int prepareBatteryVoltageReply(int batteryMillivolts, char buf[], int maxLength);
 	int prepareWheelCurrentReply(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps, char buf[], int maxLength);
   private:
@@ -34,6 +35,7 @@ class RobotAsciiCom
     void (* _batteryVoltageRequestCallback)(void);
     void (* _wheelCurrentRequestCallback)(void);
     void (* _wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle);
+    void (* _customStringCallback)(String customString);
     void _parseStringCommand(String command);
 };
 

@@ -72,6 +72,9 @@ void RobotAsciiCom::registerWheelSpeedCallback(
 	_wheelSpeedCallback = wheelSpeedCallback;
 }
 
+void RobotAsciiCom::registerCustomStringCallback( void (* customStringCallback)(String customString) ) {
+	_customStringCallback = customStringCallback;
+}
 
 int RobotAsciiCom::prepareBatteryVoltageReply(int batteryMillivolts, char buf[], int maxLength) {
 	int batteryVoltageReplyLength = 27;
@@ -131,6 +134,11 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		String gripperValueStr = command.substring(spaceIndex + 1);
 		if (_gripperCallback != NULL) {
 			_gripperCallback(gripperValueStr.toInt());
+		}
+	} else if (command.startsWith("CUSTOM")) {
+		String customStr = command.substring(spaceIndex + 1);
+		if (_customStringCallback != NULL) {
+			_customStringCallback(customStr);
 		}
 	} else if (command.startsWith("JOINT")) {
 		String jointNumStr = command.substring(spaceIndex + 1, spaceIndex + 2);

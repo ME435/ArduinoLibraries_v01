@@ -12,15 +12,21 @@
 *.la
 *.a
 
-EEPROM/
+EEPROM
+Esplora
 Ethernet
 Firmata
+GSM
 LiquidCrystal
 Morse
+Robot_Control
+Robot_Motor
 SD
 Servo
 SoftwareSerial
 SPI
 Stepper
+TFT
+WiFi
 Wire
 AsyncGolfBallStand

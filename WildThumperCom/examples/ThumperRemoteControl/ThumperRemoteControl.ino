@@ -13,11 +13,18 @@
 #define CENTER_DEADBAND 5
 #define CHANGE_THRESHOLD 5
 
+#define PIN_HORZ_ANALOG 0
+#define PIN_VERT_ANALOG 1
+
 WildThumperCom wtc(TEAM_NUMBER);
 int lastSentVertReading = 0;
 int lastSentHorzReading = 0;
 byte leftMode, rightMode, leftDutyCycle, rightDutyCycle;
 int initialHorzReading, initialVertReading;
+
+LiquidCrystal lcd(14, 15, 16, 17, 18, 19, 20);
+#define LINE_1 0
+#define LINE_2 1
 
 void setup() {
   Serial.begin(9600);
