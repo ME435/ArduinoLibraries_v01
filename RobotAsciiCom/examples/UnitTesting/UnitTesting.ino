@@ -10,6 +10,7 @@ void setup() {
   robotCom.registerGripperCallback(gripperCallback);
   robotCom.registerBatteryVoltageRequestCallback(batteryVoltageRequestCallback);
   robotCom.registerWheelSpeedCallback(wheelSpeedCallback);
+  robotCom.registerCustomStringCallback(customStringCallback);
 }
 
 void positionCallback(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
@@ -80,7 +81,11 @@ void wheelSpeedCallback(byte leftMode, byte rightMode, byte leftDutyCycle, byte 
   Serial.print(rightDutyCycle);  
   Serial.println();
 }
-  
+
+void customStringCallback(String customString) {
+  Serial.print(customString);  
+  Serial.println();
+}
 
 
 void loop() {
@@ -103,14 +108,18 @@ void loop() {
   Serial.print("Test 6: ");
   test6();
   Serial.println("");
-  // Output should be...
-  //Test 1: Gripper command to 42
-  //Test 2: Position command: 10 20 30 40 50
-  //Test 3: Battery voltage request
-  //Test 4: Joint angle command for joint 3 to move to 33
-  //Test 5: Wheel speed command.  Left Forward 120 Right Brake 4
-  //Test 5: Joint angle command for joint 1 to move to -88
-
+  Serial.println("Test 7: ");
+  test7();
+  Serial.println("");
+  // Output should be... (ignoring line breaks)
+  // Test 1: Gripper command to 42
+  // Test 2: Position command: 10 20 30 40 50
+  // Test 3: Battery voltage request
+  // Test 4: Joint angle command for joint 3 to move to 33
+  // Test 5: Wheel speed command.  Left Forward 120 Right Brake 4
+  // Test 6: Joint angle command for joint 1 to move to -88
+  // Test 7: Hello, World!
+  
   while(1);
 }
 
@@ -237,10 +246,14 @@ void test5() {
   robotCom.handleRxByte('\n');
 }
 
-
-
 void test6() {
   byte testArray[] = "JOINT 1 ANGLE -88 ";
   testArray[17] = '\n';
   robotCom.handleRxBytes(testArray, 18);
+}
+
+void test7() {
+  byte testArray[] = "CUSTOM Hello, World! ";
+  testArray[20] = '\n';
+  robotCom.handleRxBytes(testArray, 21);
 }
