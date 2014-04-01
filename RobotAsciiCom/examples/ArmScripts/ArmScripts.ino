@@ -56,6 +56,7 @@ void setup() {
   robotCom.registerPositionCallback(positionCallback);
   robotCom.registerJointAngleCallback(jointAngleCallback);
   robotCom.registerGripperCallback(gripperCallback);
+  robotCom.registerAttachSelectedServosCallback(attachSelectedServosCallback);
   lcd.clear();
   lcd.print("Ready");
   delay(1500);
@@ -100,6 +101,15 @@ void gripperCallback(int gripperDistance) {
   lcd.print("Gripper to ");
   lcd.print(gripperDistance);
 }   
+
+void attachSelectedServosCallback(byte servosToEnable) {
+  armServos.attachSelectedServos(servosToEnable);
+  lcd.clear();
+  lcd.print("Attach:");
+  lcd.setCursor(0, LINE_2);
+  lcd.print("54321G = ");
+  lcd.print(servosToEnable, BIN);
+}
 
 void loop() {
   // See if there is a new message from Android.

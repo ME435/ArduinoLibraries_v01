@@ -3,7 +3,7 @@
 RobotAsciiCom robotCom;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(100);
   robotCom.registerPositionCallback(positionCallback);
   robotCom.registerJointAngleCallback(jointAngleCallback);
@@ -11,6 +11,7 @@ void setup() {
   robotCom.registerBatteryVoltageRequestCallback(batteryVoltageRequestCallback);
   robotCom.registerWheelSpeedCallback(wheelSpeedCallback);
   robotCom.registerCustomStringCallback(customStringCallback);
+  robotCom.registerAttachSelectedServosCallback(attachSelectedServosCallback);
 }
 
 void positionCallback(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) {
@@ -87,6 +88,12 @@ void customStringCallback(String customString) {
   Serial.println();
 }
 
+void attachSelectedServosCallback(byte servosToEnable) {
+  Serial.print("Attach: ");  
+  Serial.print(servosToEnable, BIN);  
+  Serial.println();
+}
+
 
 void loop() {
   
@@ -111,6 +118,12 @@ void loop() {
   Serial.println("Test 7: ");
   test7();
   Serial.println("");
+  Serial.println("Test 8: ");
+  test8();
+  Serial.println("");
+  Serial.println("Test 9: ");
+  test9();
+  Serial.println("");
   // Output should be... (ignoring line breaks)
   // Test 1: Gripper command to 42
   // Test 2: Position command: 10 20 30 40 50
@@ -119,6 +132,8 @@ void loop() {
   // Test 5: Wheel speed command.  Left Forward 120 Right Brake 4
   // Test 6: Joint angle command for joint 1 to move to -88
   // Test 7: Hello, World!
+  // Test 8: 
+  // Test 9: Attach: 111110
   
   while(1);
 }
@@ -256,4 +271,16 @@ void test7() {
   byte testArray[] = "CUSTOM Hello, World! ";
   testArray[20] = '\n';
   robotCom.handleRxBytes(testArray, 21);
+}
+
+void test8() {
+  byte testArray[] = "ATTACH 1101 ";
+  testArray[11] = '\n';
+  robotCom.handleRxBytes(testArray, 12);
+}
+
+void test9() {
+  byte testArray[] = "ATTACH 111110 ";
+  testArray[13] = '\n';
+  robotCom.handleRxBytes(testArray, 14);
 }

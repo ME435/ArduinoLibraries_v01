@@ -76,6 +76,10 @@ void RobotAsciiCom::registerCustomStringCallback( void (* customStringCallback)(
 	_customStringCallback = customStringCallback;
 }
 
+void RobotAsciiCom::registerAttachSelectedServosCallback( void (* attachSelectedServosCallback)(byte servosToEnable) ) {
+	_attachSelectedServosCallback = attachSelectedServosCallback;
+}
+
 int RobotAsciiCom::prepareBatteryVoltageReply(int batteryMillivolts, char buf[], int maxLength) {
 	int batteryVoltageReplyLength = 27;
 	// 123456789012345678901234567
@@ -139,6 +143,33 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		String customStr = command.substring(spaceIndex + 1);
 		if (_customStringCallback != NULL) {
 			_customStringCallback(customStr);
+		}
+	} else if (command.startsWith("ATTACH")) {
+		String servosToEnableStr = command.substring(spaceIndex + 1);
+		if (servosToEnableStr.length() != 6) {
+			return;
+		}
+		byte servosToEnable = 0;
+		if (servosToEnableStr.charAt(0) == '1') {
+			servosToEnable |= 0x20;  // Joint 5
+		}
+		if (servosToEnableStr.charAt(1) == '1') {
+			servosToEnable |= 0x10;  // Joint 4
+		}
+		if (servosToEnableStr.charAt(2) == '1') {
+			servosToEnable |= 0x08;  // Joint 3
+		}
+		if (servosToEnableStr.charAt(3) == '1') {
+			servosToEnable |= 0x04;  // Joint 2
+		}
+		if (servosToEnableStr.charAt(4) == '1') {
+			servosToEnable |= 0x02;  // Joint 1
+		}
+		if (servosToEnableStr.charAt(5) == '1') {
+			servosToEnable |= 0x01;  // Gripper
+		}
+		if (_attachSelectedServosCallback != NULL) {
+			_attachSelectedServosCallback(servosToEnable);
 		}
 	} else if (command.startsWith("JOINT")) {
 		String jointNumStr = command.substring(spaceIndex + 1, spaceIndex + 2);
