@@ -52,7 +52,7 @@ void setup() {
   attachInterrupt(1, int1_isr, FALLING);
   attachInterrupt(2, int2_isr, FALLING);
   lcd.begin(16, 2);
-  armServos.attachSelectedServos(0x3E); // All the joints except for the gripper.
+  armServos.attach(); // Attach all servos at the start (even gripper).
   robotCom.registerPositionCallback(positionCallback);
   robotCom.registerJointAngleCallback(jointAngleCallback);
   robotCom.registerGripperCallback(gripperCallback);
