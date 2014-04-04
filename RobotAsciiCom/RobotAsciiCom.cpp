@@ -56,6 +56,17 @@ void RobotAsciiCom::registerGripperCallback(
 	_gripperCallback = gripperCallback;
 }
 
+void RobotAsciiCom::registerAttachSelectedServosCallback(
+		void (*attachSelectedServosCallback)(byte servosToEnable)) {
+	_attachSelectedServosCallback = attachSelectedServosCallback;
+}
+
+void RobotAsciiCom::registerWheelSpeedCallback(
+		void (*wheelSpeedCallback)(byte leftMode, byte rightMode,
+				byte leftDutyCycle, byte rightDutyCycle)) {
+	_wheelSpeedCallback = wheelSpeedCallback;
+}
+
 void RobotAsciiCom::registerBatteryVoltageRequestCallback(
 		void (*batteryVoltageRequestCallback)(void)) {
 	_batteryVoltageRequestCallback = batteryVoltageRequestCallback;
@@ -66,21 +77,13 @@ void RobotAsciiCom::registerWheelCurrentRequestCallback(
 	_wheelCurrentRequestCallback = wheelCurrentRequestCallback;
 }
 
-void RobotAsciiCom::registerWheelSpeedCallback(
-		void (*wheelSpeedCallback)(byte leftMode, byte rightMode,
-				byte leftDutyCycle, byte rightDutyCycle)) {
-	_wheelSpeedCallback = wheelSpeedCallback;
-}
-
-void RobotAsciiCom::registerCustomStringCallback( void (* customStringCallback)(String customString) ) {
+void RobotAsciiCom::registerCustomStringCallback(
+		void (*customStringCallback)(String customString)) {
 	_customStringCallback = customStringCallback;
 }
 
-void RobotAsciiCom::registerAttachSelectedServosCallback( void (* attachSelectedServosCallback)(byte servosToEnable) ) {
-	_attachSelectedServosCallback = attachSelectedServosCallback;
-}
-
-int RobotAsciiCom::prepareBatteryVoltageReply(int batteryMillivolts, char buf[], int maxLength) {
+int RobotAsciiCom::prepareBatteryVoltageReply(int batteryMillivolts, char buf[],
+		int maxLength) {
 	int batteryVoltageReplyLength = 27;
 	// 123456789012345678901234567
 	// BATTERY VOLTAGE REPLY 1.234
@@ -88,25 +91,27 @@ int RobotAsciiCom::prepareBatteryVoltageReply(int batteryMillivolts, char buf[],
 	if (maxLength < batteryVoltageReplyLength) {
 		return -1;
 	}
-	sprintf(buf, "BATTERY VOLTAGE REPLY %d.%03d", batteryMillivolts / 1000, batteryMillivolts % 1000);
+	sprintf(buf, "BATTERY VOLTAGE REPLY %d.%03d", batteryMillivolts / 1000,
+			batteryMillivolts % 1000);
 	if (batteryMillivolts / 1000 > 10) {
 		batteryVoltageReplyLength++;
 	}
 	return batteryVoltageReplyLength;
 }
 
-int RobotAsciiCom::prepareWheelCurrentReply(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps, char buf[], int maxLength) {
+int RobotAsciiCom::prepareWheelCurrentReply(int leftWheelMotorsMilliamps,
+		int rightWheelMotorsMilliamps, char buf[], int maxLength) {
 	int wheelCurrentReplyLength = 31;
 	// 1234567890123456789012345678901
 	// WHEEL CURRENT REPLY 1.234 2.345
 	// WHEEL CURRENT REPLY %d.%03d %d.%03d
 	sprintf(buf, "WHEEL CURRENT REPLY %d.%03d %d.%03d",
-	      leftWheelMotorsMilliamps / 1000, leftWheelMotorsMilliamps % 1000,
-	      rightWheelMotorsMilliamps / 1000, rightWheelMotorsMilliamps % 1000);
-	if (leftWheelMotorsMilliamps / 1000  > 10) {
+			leftWheelMotorsMilliamps / 1000, leftWheelMotorsMilliamps % 1000,
+			rightWheelMotorsMilliamps / 1000, rightWheelMotorsMilliamps % 1000);
+	if (leftWheelMotorsMilliamps / 1000 > 10) {
 		wheelCurrentReplyLength++;
 	}
-	if (rightWheelMotorsMilliamps / 1000  > 10) {
+	if (rightWheelMotorsMilliamps / 1000 > 10) {
 		wheelCurrentReplyLength++;
 	}
 	return wheelCurrentReplyLength;
@@ -134,15 +139,18 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 			_positionCallback(jointAngles[1], jointAngles[2], jointAngles[3],
 					jointAngles[4], jointAngles[5]);
 		}
+	} else if (command.startsWith("JOINT")) {
+		String jointNumStr = command.substring(spaceIndex + 1, spaceIndex + 2);
+		// For now I'm ignoring the next keyword ANGLE (lazy since it's the only command for a JOINT target)
+		int lastSpaceIndex = command.lastIndexOf(' ');
+		angleStr = command.substring(lastSpaceIndex + 1);
+		if (_jointAngleCallback != NULL) {
+			_jointAngleCallback((byte)(jointNumStr.toInt()), angleStr.toInt());
+		}
 	} else if (command.startsWith("GRIPPER")) {
 		String gripperValueStr = command.substring(spaceIndex + 1);
 		if (_gripperCallback != NULL) {
 			_gripperCallback(gripperValueStr.toInt());
-		}
-	} else if (command.startsWith("CUSTOM")) {
-		String customStr = command.substring(spaceIndex + 1);
-		if (_customStringCallback != NULL) {
-			_customStringCallback(customStr);
 		}
 	} else if (command.startsWith("ATTACH")) {
 		String servosToEnableStr = command.substring(spaceIndex + 1);
@@ -170,22 +178,6 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		}
 		if (_attachSelectedServosCallback != NULL) {
 			_attachSelectedServosCallback(servosToEnable);
-		}
-	} else if (command.startsWith("JOINT")) {
-		String jointNumStr = command.substring(spaceIndex + 1, spaceIndex + 2);
-		// For now I'm ignoring the next keyword ANGLE (lazy since it's the only command for a JOINT target)
-		int lastSpaceIndex = command.lastIndexOf(' ');
-		angleStr = command.substring(lastSpaceIndex + 1);
-		if (_jointAngleCallback != NULL) {
-			_jointAngleCallback((byte)(jointNumStr.toInt()), angleStr.toInt());
-		}
-	} else if (command.startsWith("BATTERY VOLTAGE REQUEST")) {
-		if (_batteryVoltageRequestCallback != NULL) {
-			_batteryVoltageRequestCallback();
-		}
-	} else if (command.startsWith("WHEEL CURRENT REQUEST")) {
-		if (_wheelCurrentRequestCallback != NULL) {
-			_wheelCurrentRequestCallback();
 		}
 	} else if (command.startsWith("WHEEL SPEED")) {
 		command = command.substring(spaceIndex + 1); // Removes the word WHEEL
@@ -222,6 +214,19 @@ void RobotAsciiCom::_parseStringCommand(String command) {
 		if (_wheelSpeedCallback != NULL) {
 			_wheelSpeedCallback(leftMode, rightMode, leftDutyCycle,
 					rightDutyCycle);
+		}
+	} else if (command.startsWith("BATTERY VOLTAGE REQUEST")) {
+		if (_batteryVoltageRequestCallback != NULL) {
+			_batteryVoltageRequestCallback();
+		}
+	} else if (command.startsWith("WHEEL CURRENT REQUEST")) {
+		if (_wheelCurrentRequestCallback != NULL) {
+			_wheelCurrentRequestCallback();
+		}
+	} else if (command.startsWith("CUSTOM")) {
+		String customStr = command.substring(spaceIndex + 1);
+		if (_customStringCallback != NULL) {
+			_customStringCallback(customStr);
 		}
 	}
 }

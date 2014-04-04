@@ -20,11 +20,11 @@ class RobotAsciiCom
     void registerPositionCallback(void (* positionCallback)(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle) );
     void registerJointAngleCallback(void (* jointAngleCallback)(byte jointNumber, int jointAngle) );
     void registerGripperCallback(void (* gripperCallback)(int gripperDistance) );
+    void registerAttachSelectedServosCallback( void (* attachSelectedServosCallback)(byte servosToEnable) );
+	void registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) );
     void registerBatteryVoltageRequestCallback(void (* batteryVoltageRequestCallback)(void) );
     void registerWheelCurrentRequestCallback(void (* wheelCurrentRequestCallback)(void) );
-	void registerWheelSpeedCallback(void (* wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) );
 	void registerCustomStringCallback( void (* customStringCallback)(String customString) );
-	void registerAttachSelectedServosCallback( void (* attachSelectedServosCallback)(byte servosToEnable) );
 	int prepareBatteryVoltageReply(int batteryMillivolts, char buf[], int maxLength);
 	int prepareWheelCurrentReply(int leftWheelMotorsMilliamps, int rightWheelMotorsMilliamps, char buf[], int maxLength);
   private:
@@ -33,11 +33,11 @@ class RobotAsciiCom
     void (* _positionCallback)(int joint1Angle, int joint2Angle, int joint3Angle, int joint4Angle, int joint5Angle);
     void (* _jointAngleCallback)(byte joint, int jointAngle);
     void (* _gripperCallback)(int gripperDistance);
+    void (* _attachSelectedServosCallback)(byte servosToEnable);
+    void (* _wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle);
     void (* _batteryVoltageRequestCallback)(void);
     void (* _wheelCurrentRequestCallback)(void);
-    void (* _wheelSpeedCallback)(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle);
     void (* _customStringCallback)(String customString);
-    void (* _attachSelectedServosCallback)(byte servosToEnable);
     void _parseStringCommand(String command);
 };
 
