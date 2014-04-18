@@ -72,6 +72,7 @@ void setup() {
   robotAsciiCom.registerPositionCallback(positionMessageFromAndroid);
   robotAsciiCom.registerJointAngleCallback(jointAngleMessageFromAndroid);
   robotAsciiCom.registerGripperCallback(gripperMessageFromAndroid);
+  robotAsciiCom.registerAttachSelectedServosCallback(attachSelectedServosCallback);
   robotAsciiCom.registerBatteryVoltageRequestCallback(batteryVoltageRequestFromAndroid);
   robotAsciiCom.registerWheelCurrentRequestCallback(wheelCurrentRequestFromAndroid);
   
@@ -135,7 +136,16 @@ void gripperMessageFromAndroid(int gripperDistance) {
   lcd.setCursor(0, LINE_2);
   lcd.print("Gripper to ");
   lcd.print(gripperDistance);
-}   
+}
+   
+void attachSelectedServosCallback(byte servosToEnable) {
+  wildThumperCom.sendAttachSelectedServos(servosToEnable);
+  lcd.clear();
+  lcd.print("Attach:");
+  lcd.setCursor(0, LINE_2);
+  lcd.print("54321G = ");
+  lcd.print(servosToEnable, BIN);
+}
 
 void batteryVoltageRequestFromAndroid(void) {
   wildThumperCom.sendBatteryVoltageRequest();
