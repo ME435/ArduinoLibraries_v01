@@ -158,7 +158,12 @@ void wheelCurrentRequestFromAndroid(void) {
 
 void customStringCallbackFromAndroid(String customString) {
   lcd.clear();
-  lcd.print("Custom");
+  if (customString.equalsIgnoreCase("my custom command")) {
+    lcd.print("Known CUSTOM");
+    // perform that command
+  } else {
+    lcd.print("Unknown CUSTOM");
+  }
   lcd.setCursor(0, LINE_2);
   lcd.print(customString);
 }
