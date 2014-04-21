@@ -75,6 +75,7 @@ void setup() {
   robotAsciiCom.registerAttachSelectedServosCallback(attachSelectedServosCallback);
   robotAsciiCom.registerBatteryVoltageRequestCallback(batteryVoltageRequestFromAndroid);
   robotAsciiCom.registerWheelCurrentRequestCallback(wheelCurrentRequestFromAndroid);
+  robotAsciiCom.registerCustomStringCallback(customStringCallbackFromAndroid);
   
   // Register callbacks for commands you might receive from the Wild Thumper.
   wildThumperCom.registerBatteryVoltageReplyCallback(batteryVoltageReplyFromThumper);
@@ -153,6 +154,13 @@ void batteryVoltageRequestFromAndroid(void) {
 
 void wheelCurrentRequestFromAndroid(void) {
   wildThumperCom.sendWheelCurrentRequest();
+}
+
+void customStringCallbackFromAndroid(String customString) {
+  lcd.clear();
+  lcd.print("Custom");
+  lcd.setCursor(0, LINE_2);
+  lcd.print(customString);
 }
 
 void batteryVoltageReplyFromThumper(int batteryMillivolts) {
