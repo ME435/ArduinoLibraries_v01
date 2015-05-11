@@ -16,7 +16,7 @@ AndroidAccessory acc(manufacturer,
                      model,
                      "ME435 robot arm message relay station.",
                      versionStr,
-                     "https://sites.google.com/site/me435spring2013/",
+                     "https://sites.google.com/site/me435spring2015/",
                      "12345");
 
 byte rxBuf[255];
@@ -27,15 +27,9 @@ int wheelCurrentReplyLength = 0;
 // Turned out to be easier since the whole message arrives together.
 
 // Just a random set of scripts that you might make for testing.
-char placeBallOn1Script[] = "place_ball_on_1";
-char placeBallOn2Script[] = "place_ball_on_2";
-char placeBallOn3Script[] = "place_ball_on_3";
-char black1Script[] = "black_1";
-char nonblack1Script[] = "nonblack_1";
-char black2Script[] = "black_2";
-char nonblack2Script[] = "nonblack_2";
-char black3Script[] = "black_3";
-char nonblack3Script[] = "nonblack_3";
+char rightButtonScript[] = "script3";
+char leftButtonScript[] = "script2";
+char selectButtonScript[] = "script1";
 
 /***  Pin I/O   ***/ 
 #define PIN_RIGHT_BUTTON 2
@@ -231,21 +225,21 @@ void loop() {
       delay(20);
       mainEventFlags &= ~FLAG_INTERRUPT_0;
       if (!digitalRead(PIN_RIGHT_BUTTON)) {
-        acc.write(black2Script, sizeof(black2Script));
+        acc.write(rightButtonScript, sizeof(rightButtonScript));
       }
     }
     if (mainEventFlags & FLAG_INTERRUPT_1) {
       delay(20);
       mainEventFlags &= ~FLAG_INTERRUPT_1;
       if (!digitalRead(PIN_LEFT_BUTTON)) {
-        acc.write(nonblack2Script, sizeof(nonblack2Script));
+        acc.write(leftButtonScript, sizeof(leftButtonScript));
       }
     }
     if (mainEventFlags & FLAG_INTERRUPT_2) {
       delay(20);
       mainEventFlags &= ~FLAG_INTERRUPT_2;
       if (!digitalRead(PIN_SELECT_BUTTON)) {
-        acc.write(placeBallOn2Script, sizeof(placeBallOn2Script));
+        acc.write(selectButtonScript, sizeof(selectButtonScript));
       }
     }
     // Passing commands from the Wild Thumper on up to Android.
