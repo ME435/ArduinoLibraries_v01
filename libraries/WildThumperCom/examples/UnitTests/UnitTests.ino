@@ -8,7 +8,38 @@
 WildThumperCom wtc(TEAM_NUMBER);
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600);  
+  wtc.registerWheelSpeedCallback(updateWheelSpeed);
+  runTests();
+}
+
+void runTests() {
+  Serial.println("Test 1: ");
+  Serial.print(" Expected : ");
+  Serial.println("Update wheel speeds to Left Reverse 100 Right Reverse 100");
+  Serial.print(" Actual   : ");
+  test1();
+  Serial.println("Test 2: ");
+  Serial.print(" Expected : ");
+  Serial.println("");
+  Serial.print(" Actual   : ");
+  test2();
+  Serial.println(""); // necessary since nothing prints in test 2.
+  Serial.println("Test 3: ");
+  Serial.print(" Expected : ");
+  Serial.println("Update wheel speeds to Left Reverse 99 Right Reverse 100");
+  Serial.print(" Actual   : ");
+  test3();
+  Serial.println("Test 4: ");
+  Serial.print(" Expected : ");
+  Serial.println("Update wheel speeds to Left Brake 100 Right Forward 100");
+  Serial.print(" Actual   : ");
+  test4();
+  Serial.println("Test 5: ");
+  Serial.print(" Expected : ");
+  Serial.println("Update wheel speeds to Left Reverse 126 Right Reverse 125");
+  Serial.print(" Actual   : ");
+  test5();
 }
 
 void updateWheelSpeed(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) {
@@ -36,34 +67,18 @@ void updateWheelSpeed(byte leftMode, byte rightMode, byte leftDutyCycle, byte ri
       Serial.print(" Right Forward ");
       break;
   }
-  Serial.print(rightDutyCycle);
+  Serial.println(rightDutyCycle);
 }
 
 void loop() {
-  wtc.registerWheelSpeedCallback(updateWheelSpeed);
-  Serial.print("Test 1: ");
-  test1();
-  Serial.println("");
-  Serial.print("Test 2: ");
-  test2();
-  Serial.println("");
-  Serial.print("Test 3: ");
-  test3();
-  Serial.println("");
-  Serial.print("Test 4: ");
-  test4();
-  Serial.println("");
-  Serial.print("Test 5: ");
-  test5();
-  Serial.println("");
-  // Output should be...
-  //Test 1: Update wheel speeds to Left Reverse 100 Right Reverse 100
-  //Test 2: 
-  //Test 3: Update wheel speeds to Left Reverse 100 Right Reverse 100
-  //Test 4: Update wheel speeds to Left Brake 99 Right Forward 100
-  //Test 5: Update wheel speeds to Left Reverse 126 Right Reverse 125
 
-  while(1);
+}
+
+/** Send all bytes received to the Wild Thumper Com object. */
+void serialEvent() {
+  while (Serial.available()) {
+    wtc.handleRxByte(Serial.read());
+  }
 }
 
 void test1() {
@@ -89,7 +104,7 @@ void test2() {
   wtc.handleRxByte(100);
   wtc.handleRxByte(100);
   // Manually calculate crc 16+1+0+0+100+100 = 217
-  wtc.handleRxByte(-216);
+  wtc.handleRxByte(-216);  // Intentially send the wrong CRC.
 }
 
 void test3() {
