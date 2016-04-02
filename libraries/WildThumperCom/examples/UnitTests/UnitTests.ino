@@ -19,28 +19,29 @@ void runTests() {
   Serial.println("Update wheel speeds to Left Reverse 100 Right Reverse 100");
   Serial.print(" Actual   : ");
   test1();
-  Serial.println("Test 2: ");
+  Serial.println("\nTest 2: ");
   Serial.print(" Expected : ");
   Serial.println("");
   Serial.print(" Actual   : ");
   test2();
   Serial.println(""); // necessary since nothing prints in test 2.
-  Serial.println("Test 3: ");
+  Serial.println("\nTest 3: ");
   Serial.print(" Expected : ");
   Serial.println("Update wheel speeds to Left Reverse 99 Right Reverse 100");
   Serial.print(" Actual   : ");
   test3();
-  Serial.println("Test 4: ");
+  Serial.println("\nTest 4: ");
   Serial.print(" Expected : ");
   Serial.println("Update wheel speeds to Left Brake 100 Right Forward 100");
   Serial.print(" Actual   : ");
   test4();
-  Serial.println("Test 5: ");
+  Serial.println("\nTest 5: ");
   Serial.print(" Expected : ");
   Serial.println("Update wheel speeds to Left Reverse 126 Right Reverse 125");
   Serial.print(" Actual   : ");
   test5();
 }
+
 
 void updateWheelSpeed(byte leftMode, byte rightMode, byte leftDutyCycle, byte rightDutyCycle) {
   Serial.print("Update wheel speeds to ");
@@ -70,6 +71,7 @@ void updateWheelSpeed(byte leftMode, byte rightMode, byte leftDutyCycle, byte ri
   Serial.println(rightDutyCycle);
 }
 
+// Nothing in the loop.  Only the serialEvent.
 void loop() {
 
 }
