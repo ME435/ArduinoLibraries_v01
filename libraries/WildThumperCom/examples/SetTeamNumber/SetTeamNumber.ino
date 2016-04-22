@@ -43,6 +43,12 @@ volatile int mainEventFlags = 0;
 #define FLAG_SELECT_BUTTON                 0x0004
 
 TimerEventScheduler tes;
+
+// Function prototypes for TimerEvent callbacks.
+int rightButtonDebounceCallback(); 
+int leftButtonDebounceCallback();
+int selectButtonDebounceCallback();
+
 // Create timer events that are initially disabled (call in 0 ms = never)
 TimerEvent rightButtonDebounceTimerEvent(rightButtonDebounceCallback, 0);
 TimerEvent leftButtonDebounceTimerEvent(leftButtonDebounceCallback, 0);
