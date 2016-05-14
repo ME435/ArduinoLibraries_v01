@@ -260,13 +260,13 @@ void WildThumperCom::handleRxByte(byte newRxByte) {
 
 void WildThumperCom::_parseValidMessage() {
 	byte teamNumber = _rxMessageBuffer[TEAM_NUMBER_BYTE];
-	if (teamNumber != _teamNumber
-		&& !(_rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_REQUEST ||
-			 _rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_REPLY ||
-			 _rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_CHANGE_REQUEST)) {
-		// Silently do nothing if it's not our team.
-		return;
-	}
+//	if (teamNumber != _teamNumber
+//		&& !(_rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_REQUEST ||
+//			 _rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_REPLY ||
+//			 _rxMessageBuffer[COMMAND_BYTE] == COMMAND_TEAM_NUMBER_CHANGE_REQUEST)) {
+//		// Silently do nothing if it's not our team.
+//		return;
+//	}
 	switch (_rxMessageBuffer[COMMAND_BYTE]) {
 	case COMMAND_WHEEL_SPEED:
 		if (_wheelSpeedCallback != NULL) {
