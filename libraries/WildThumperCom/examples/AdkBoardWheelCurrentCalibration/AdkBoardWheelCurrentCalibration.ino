@@ -24,6 +24,8 @@ volatile int mainEventFlags = 0;
 #define FLAG_LEFT_BUTTON                   0x0002
 
 TimerEventScheduler tes;
+int rightButtonDebounceCallback();
+int leftButtonDebounceCallback();
 // Create timer events that are initially disabled (call in 0 ms = never)
 TimerEvent leftButtonDebounceTimerEvent(leftButtonDebounceCallback, 0);
 TimerEvent rightButtonDebounceTimerEvent(rightButtonDebounceCallback, 0);
